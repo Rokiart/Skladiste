@@ -69,7 +69,19 @@ namespace SKladisteAppl.Controllers
             }
         }
 
-
+        /// <summary>
+        /// Dohvaća sve sifru iz baze
+        /// </summary>
+        /// <remarks>
+        /// Primjer upita
+        /// 
+        ///    GET api/v1/Sifra
+        ///    
+        /// </remarks>
+        /// <returns>Sifre u bazi</returns>
+        /// <response code="200">Sve OK, ako nema podataka content-length: 0 </response>
+        /// <response code="400">Zahtjev nije valjan</response>
+        /// <response code="503">Baza na koju se spajam nije dostupna</response
         [HttpGet]
         [Route("{sifra:int}")]
         public IActionResult GetBySifra(int sifra)
@@ -101,23 +113,23 @@ namespace SKladisteAppl.Controllers
         ///     POST api/v1/Skladištar
         ///     {naziv: "Primjer naziva"}
         /// </remarks>
-        /// <param name="skladistar">Skladistar za unijeti u JSON formatu</param>
+        /// <param name="entitet">Skladistar za unijeti u JSON formatu</param>
         /// <response code="201">Kreirano</response>
         /// <response code="400">Zahtjev nije valjan (BadRequest)</response> 
         /// <response code="503">Baza nedostupna iz razno raznih razloga</response> 
         /// <returns>Skladistar s šifrom koju je dala baza</returns>
         [HttpPost]
-        public IActionResult Post(Skladistar skladistar)
+        public IActionResult Post(Skladistar entitet)
         {
-            if (!ModelState.IsValid || skladistar == null)
+            if (!ModelState.IsValid || entitet == null)
             {
                 return BadRequest();
             }
             try
             {
-                _context.Skladistari.Add(skladistar);
+                _context.Skladistari.Add(entitet);
                 _context.SaveChanges();
-                return StatusCode(StatusCodes.Status201Created, skladistar);
+                return StatusCode(StatusCodes.Status201Created, entitet);
             }
             catch (Exception ex)
             {
@@ -144,7 +156,7 @@ namespace SKladisteAppl.Controllers
         ///
         /// </remarks>
         /// <param name="sifra">Šifra skladistara koji se mijenja</param>  
-        /// <param name="skladistar">Skladistar za unijeti u JSON formatu</param>  
+        /// <param name="entitet">Skladistar za unijeti u JSON formatu</param>  
         /// <returns>Svi poslani podaci od skladistara koji su spremljeni u bazi</returns>
         /// <response code="200">Sve je u redu</response>
         /// <response code="204">Nema u bazi osobe kojeu želimo promijeniti</response>
@@ -154,9 +166,9 @@ namespace SKladisteAppl.Controllers
 
         [HttpPut]
         [Route("{sifra:int}")]
-        public IActionResult Put(int sifra, Skladistar skladistar)
+        public IActionResult Put(int sifra, Skladistar entitet)
         {
-            if (sifra <= 0 || !ModelState.IsValid || skladistar == null)
+            if (sifra <= 0 || !ModelState.IsValid || entitet == null)
             {
                 return BadRequest();
             }
@@ -166,9 +178,9 @@ namespace SKladisteAppl.Controllers
             {
 
 
-                var skladistarIzBaze = _context.Skladistari.Find(sifra);
+                var entitetIzBaze = _context.Skladistari.Find(sifra);
 
-                if (skladistarIzBaze == null)
+                if (entitetIzBaze == null)
                 {
                     return StatusCode(StatusCodes.Status204NoContent, sifra);
                 }
@@ -176,16 +188,16 @@ namespace SKladisteAppl.Controllers
 
                 // inače ovo rade mapperi
                 // za sada ručno
-                skladistarIzBaze.Ime = skladistar.Ime;
-                skladistarIzBaze.Prezime = skladistar.Prezime;
-                skladistarIzBaze.Email = skladistar.Email;
-                skladistarIzBaze.BrojTelefona = skladistar.BrojTelefona;
+                entitetIzBaze.Ime = entitet.Ime;
+                entitetIzBaze.Prezime = entitet.Prezime;
+                entitetIzBaze.Email = entitet.Email;
+                entitetIzBaze.BrojTelefona = entitet.BrojTelefona;
 
 
-                _context.Skladistari.Update(skladistarIzBaze);
+                _context.Skladistari.Update(entitetIzBaze);
                 _context.SaveChanges();
 
-                return StatusCode(StatusCodes.Status200OK, skladistarIzBaze);
+                return StatusCode(StatusCodes.Status200OK,entitetIzBaze);
             }
             catch (Exception ex)
             {
@@ -221,14 +233,14 @@ namespace SKladisteAppl.Controllers
 
             try
             {
-                var skladistarIzBaze = _context.Skladistari.Find(sifra);
+                var entitetIzBaze = _context.Skladistari.Find(sifra);
 
-                if (skladistarIzBaze == null)
+                if (entitetIzBaze == null)
                 {
                     return StatusCode(StatusCodes.Status204NoContent, sifra);
                 }
 
-                _context.Skladistari.Remove(skladistarIzBaze);
+                _context.Skladistari.Remove(entitetIzBaze);
                 _context.SaveChanges();
 
                 return new JsonResult("{\"poruka\": \"Obrisano\"}");

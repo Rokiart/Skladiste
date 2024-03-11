@@ -23,15 +23,22 @@ namespace SKladisteAppl.Models
         /// <summary>
         /// Vanjski kljuc za osobu
         /// </summary>
-        //public ICollection<Osoba> Osobe { get; set; }
+        [ForeignKey("osoba")]
+        public Osoba? Osoba { get; set; }
         /// <summary>
         /// Vanjski kljuc za skladistara
         /// </summary>
-        //public ICollection<Skladistar> Skladistari { get; set; }
+        [ForeignKey("skladistar")]
+        public Skladistar? Skladistar { get; set; }
         /// <summary>
         /// Napomena max 250 karaktera u bazi
         /// </summary>
         public string? Napomena { get; set; }
-       
+        /// <summary>
+        /// ključ više na više
+        /// </summary>
+
+        public List<Proizvod>? Proizvodi{ get; set; }
+
     }
 }

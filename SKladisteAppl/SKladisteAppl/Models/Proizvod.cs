@@ -25,6 +25,11 @@ namespace SKladisteAppl.Models
         /// </summary>
         [Required(ErrorMessage = "mjerna jedinica obavezno")]
         public string? Mjernajedinica { get; set; }
-        
+        /// <summary>
+        /// spajanje ključeva
+        /// </summary>
+
+        public ICollection<Izdatnica>? Izdatnice { get; set; } = new List<Izdatnica>();
+
     }
 }

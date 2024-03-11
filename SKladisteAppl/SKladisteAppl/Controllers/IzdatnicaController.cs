@@ -2,6 +2,7 @@
 using SKladisteAppl.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
 
 
 namespace SKladisteAppl.Controllers
@@ -75,8 +76,13 @@ namespace SKladisteAppl.Controllers
             }
             try
             {
-                var izdatnica = _context.Izdatnice.Find(sifra);
-                if (izdatnica == null)
+                var izdatnica = _context.Izdatnice
+                    .Include(i => i.Osoba)
+                    .Include(i => i.Skladistar)
+                    .Include(i => i.Proizvodi)
+                    .ToList();
+                if (lista == null || lista.Count == 0)
+                   
                 {
                     return new EmptyResult();
                 }
@@ -120,73 +126,73 @@ namespace SKladisteAppl.Controllers
             }
 
         }
-        /// <summary>
-        /// Mijenja podatke postojeće izdartnice u bazi
-        /// </summary>
-        /// <remarks>
-        /// Primjer upita:
-        ///
-        ///    PUT api/v1/izdatnica/1
-        ///
-        /// {
-        ///  "sifra": 0,
-        ///  "Broj izdatnice": "Novi Broj izdatnice",
-        ///  "Datum": "Novi Datum"
-        ///  "napomena": "nova napomena
-        /// }
-        ///
-        /// </remarks>
-        /// <param name="sifra">Šifra izdatnice koja se mijenja</param>  
-        /// <param name="izdatnica">Izdatnica za unijeti u JSON formatu</param>  
-        /// <returns>Svi poslani podaci od izdatnice koji su spremljeni u bazi</returns>
-        /// <response code="200">Sve je u redu</response>
-        /// <response code="204">Nema u bazi izdatnice koju želimo promijeniti</response>
-        /// <response code="415">Nismo poslali JSON</response> 
-        /// <response code="503">Baza nedostupna</response> 
+        ///// <summary>
+        ///// Mijenja podatke postojeće izdartnice u bazi
+        ///// </summary>
+        ///// <remarks>
+        ///// Primjer upita:
+        /////
+        /////    PUT api/v1/izdatnica/1
+        /////
+        ///// {
+        /////  "sifra": 0,
+        /////  "Broj izdatnice": "Novi Broj izdatnice",
+        /////  "Datum": "Novi Datum"
+        /////  "napomena": "nova napomena
+        ///// }
+        /////
+        ///// </remarks>
+        ///// <param name="sifra">Šifra izdatnice koja se mijenja</param>  
+        ///// <param name="izdatnica">Izdatnica za unijeti u JSON formatu</param>  
+        ///// <returns>Svi poslani podaci od izdatnice koji su spremljeni u bazi</returns>
+        ///// <response code="200">Sve je u redu</response>
+        ///// <response code="204">Nema u bazi izdatnice koju želimo promijeniti</response>
+        ///// <response code="415">Nismo poslali JSON</response> 
+        ///// <response code="503">Baza nedostupna</response> 
 
 
-        [HttpPut]
-        [Route("{sifra:int}")]
-        public IActionResult Put(int sifra, Izdatnica izdatnica)
-        {
-            if (sifra <= 0 || !ModelState.IsValid || izdatnica == null)
-            {
-                return BadRequest();
-            }
+        //[HttpPut]
+        //[Route("{sifra:int}")]
+        //public IActionResult Put(int sifra, Izdatnica izdatnica)
+        //{
+        //    if (sifra <= 0 || !ModelState.IsValid || izdatnica == null)
+        //    {
+        //        return BadRequest();
+        //    }
 
 
-            try
-            {
+        //    try
+        //    {
 
 
-                var izdatnicaIzBaze = _context.Izdatnice.Find(sifra);
+        //        var izdatnicaIzBaze = _context.Izdatnice.Find(sifra);
 
-                if (izdatnicaIzBaze == null)
-                {
-                    return StatusCode(StatusCodes.Status204NoContent, sifra);
-                }
-
-
-                // inače ovo rade mapperi
-                // za sada ručno
-                izdatnicaIzBaze.BrojIzdatnice = izdatnica.BrojIzdatnice;
-                izdatnicaIzBaze.Datum = izdatnica.Datum;
-                //izdatnicaIzBaze.Kolicina = izdatnica.kolicina;
-                izdatnicaIzBaze.Napomena = izdatnica.Napomena;
+        //        if (izdatnicaIzBaze == null)
+        //        {
+        //            return StatusCode(StatusCodes.Status204NoContent, sifra);
+        //        }
 
 
-                _context.Izdatnice.Update(izdatnicaIzBaze);
-                _context.SaveChanges();
+        //        // inače ovo rade mapperi
+        //        // za sada ručno
+        //        izdatnicaIzBaze.BrojIzdatnice = izdatnica.BrojIzdatnice;
+        //        izdatnicaIzBaze.Datum = izdatnica.Datum;
+        //        //izdatnicaIzBaze.Kolicina = izdatnica.kolicina;
+        //        izdatnicaIzBaze.Napomena = izdatnica.Napomena;
 
-                return StatusCode(StatusCodes.Status200OK, izdatnicaIzBaze);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(StatusCodes.Status503ServiceUnavailable,
-                    ex.Message);
-            }
 
-        }
+        //        _context.Izdatnice.Update(izdatnicaIzBaze);
+        //        _context.SaveChanges();
+
+        //        return StatusCode(StatusCodes.Status200OK, izdatnicaIzBaze);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return StatusCode(StatusCodes.Status503ServiceUnavailable,
+        //            ex.Message);
+        //    }
+
+        //}
         /// <summary>
         /// Briše izdatnicu iz baze
         /// </summary>
