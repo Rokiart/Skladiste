@@ -1,4 +1,5 @@
 ﻿using SKladisteAppl.Data;
+using SKladisteAppl.Extensions;
 using SKladisteAppl.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
@@ -77,7 +78,7 @@ namespace SKladisteAppl.Controllers
         /// <returns>Sifre u bazi</returns>
         /// <response code="200">Sve OK, ako nema podataka content-length: 0 </response>
         /// <response code="400">Zahtjev nije valjan</response>
-        /// <response code="503">Baza na koju se spajam nije dostupna</response
+        /// <response code="503">Baza na koju se spajam nije dostupna</response>
 
         [HttpGet]
         [Route("{sifra:int}")]
@@ -110,23 +111,25 @@ namespace SKladisteAppl.Controllers
         ///     POST api/v1/Osoba
         ///     {naziv: "Primjer naziva"}
         /// </remarks>
-        /// <param name="osoba">Osoba za unijeti u JSON formatu</param>
+        /// <param name="osobaDTO">Osoba za unijeti u JSON formatu</param>
         /// <response code="201">Kreirano</response>
         /// <response code="400">Zahtjev nije valjan (BadRequest)</response> 
         /// <response code="503">Baza nedostupna iz razno raznih razloga</response> 
         /// <returns>Osoba s šifrom koju je dala baza</returns>
         [HttpPost]
-        public IActionResult Post(Osoba osoba)
+        public IActionResult Post(OsobaDTOInsertUpdate osobaDTO)
         {
-            if (!ModelState.IsValid || osoba == null)
+            if (!ModelState.IsValid || osobaDTO == null)
             {
                 return BadRequest();
             }
             try
             {
+                var osoba = osobaDTO.MapOsobaInsertUpdateFromDTO();
                 _context.Osobe.Add(osoba);
                 _context.SaveChanges();
-                return StatusCode(StatusCodes.Status201Created, osoba);
+                return StatusCode(StatusCodes.Status201Created, 
+                    osoba.MapOsobaReadToDTO());
             }
             catch (Exception ex)
             {
@@ -135,72 +138,72 @@ namespace SKladisteAppl.Controllers
             }
         }
 
-        /// <summary>
-        /// Mijenja podatke postojeće osobe u bazi
-        /// </summary>
-        /// <remarks>
-        /// Primjer upita:
-        ///
-        ///    PUT api/v1/osoba/1
-        ///
-        /// {
-        ///  "sifra": 0,
-        ///  "ime": "Novo ime",
-        ///  "prezime": "Novo prezime",
-        ///  "Email": "Novi Email",
-        ///  "Broj telefona":"Novi broj telefona"
-        /// }
-        ///
-        /// </remarks>
-        /// <param name="sifra">Šifra osobe koji se mijenja</param>  
-        /// <param name="osoba">Osoba za unijeti u JSON formatu</param>  
-        /// <returns>Svi poslani podaci od osoba koji su spremljeni u bazi</returns>
-        /// <response code="200">Sve je u redu</response>
-        /// <response code="204">Nema u bazi osobe kojeu želimo promijeniti</response>
-        /// <response code="415">Nismo poslali JSON</response> 
-        /// <response code="503">Baza nedostupna</response> 
-        [HttpPut]
-        [Route("{sifra:int}")]
-        public IActionResult Put(int sifra, Osoba osoba)
-        {
-            if (sifra <= 0 || !ModelState.IsValid || osoba == null)
-            {
-                return BadRequest();
-            }
+        ///// <summary>
+        ///// Mijenja podatke postojeće osobe u bazi
+        ///// </summary>
+        ///// <remarks>
+        ///// Primjer upita:
+        /////
+        /////    PUT api/v1/osoba/1
+        /////
+        ///// {
+        /////  "sifra": 0,
+        /////  "ime": "Novo ime",
+        /////  "prezime": "Novo prezime",
+        /////  "Email": "Novi Email",
+        /////  "Broj telefona":"Novi broj telefona"
+        ///// }
+        /////
+        ///// </remarks>
+        ///// <param name="sifra">Šifra osobe koji se mijenja</param>  
+        ///// <param name="osoba">Osoba za unijeti u JSON formatu</param>  
+        ///// <returns>Svi poslani podaci od osoba koji su spremljeni u bazi</returns>
+        ///// <response code="200">Sve je u redu</response>
+        ///// <response code="204">Nema u bazi osobe kojeu želimo promijeniti</response>
+        ///// <response code="415">Nismo poslali JSON</response> 
+        ///// <response code="503">Baza nedostupna</response> 
+        //[HttpPut]
+        //[Route("{sifra:int}")]
+        //public IActionResult Put(int sifra, OsobaDTOInsertUpdate osobaDTO)
+        //{
+        //    if (sifra <= 0 || !ModelState.IsValid || osobaDTO == null)
+        //    {
+        //        return BadRequest();
+        //    }
 
 
-            try
-            {
+        //    try
+        //    {
 
 
-                var osobaIzBaze = _context.Osobe.Find(sifra);
+        //        var osobaIzBaze = _context.Osobe.Find(sifra);
 
-                if (osobaIzBaze == null)
-                {
-                    return StatusCode(StatusCodes.Status204NoContent, sifra);
-                }
-
-
-                // inače ovo rade mapperi
-                // za sada ručno
-                osobaIzBaze.Ime = osoba.Ime;
-                osobaIzBaze.Prezime = osoba.Prezime;
-                osobaIzBaze.Email = osoba.Email;
-                osobaIzBaze.BrojTelefona = osoba.BrojTelefona;
+        //        if (osobaIzBaze == null)
+        //        {
+        //            return StatusCode(StatusCodes.Status204NoContent, sifra);
+        //        }
 
 
-                _context.Osobe.Update(osobaIzBaze);
-                _context.SaveChanges();
+        //        // inače ovo rade mapperi
+        //        // za sada ručno
+        //        osobaIzBaze.Ime = osoba.Ime;
+        //        osobaIzBaze.Prezime = osoba.Prezime;
+        //        osobaIzBaze.Email = osoba.Email;
+        //        osobaIzBaze.BrojTelefona = osoba.BrojTelefona;
 
-                return StatusCode(StatusCodes.Status200OK, osobaIzBaze);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(StatusCodes.Status503ServiceUnavailable,
-                    ex.Message);
-            }
 
-        }
+        //        _context.Osobe.Update(osobaIzBaze);
+        //        _context.SaveChanges();
+
+        //        return StatusCode(StatusCodes.Status200OK, osobaIzBaze);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return StatusCode(StatusCodes.Status503ServiceUnavailable,
+        //            ex.Message);
+        //    }
+
+        //}
 
         /// <summary>
         /// Briše osobu iz baze

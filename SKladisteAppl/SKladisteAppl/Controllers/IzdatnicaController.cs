@@ -50,12 +50,17 @@ namespace SKladisteAppl.Controllers
             }
             try
             {
-                var izdatnice = _context.Izdatnice.ToList();
-                if (izdatnice == null || izdatnice.Count == 0)
+                var lista = _context.Izdatnice
+                  .Include(i => i.Osoba)
+                  .Include(i => i.Skladistar)
+                  .Include(i => i.Proizvodi)
+                  .ToList();
+                if (lista == null || lista.Count == 0)
+                   
                 {
                     return new EmptyResult();
                 }
-                return new JsonResult(izdatnice);
+                return new JsonResult(lista);
             }
             catch (Exception ex)
             {
@@ -63,7 +68,19 @@ namespace SKladisteAppl.Controllers
                     ex.Message);
             }
         }
-
+        /// <summary>
+        /// Dohvaća sve sifru iz baze
+        /// </summary>
+        /// <remarks>
+        /// Primjer upita
+        /// 
+        ///    GET api/v1/Sifra
+        ///    
+        /// </remarks>
+        /// <returns>Sifre u bazi</returns>
+        /// <response code="200">Sve OK, ako nema podataka content-length: 0 </response>
+        /// <response code="400">Zahtjev nije valjan</response>
+        /// <response code="503">Baza na koju se spajam nije dostupna</response>
 
         [HttpGet]
         [Route("{sifra:int}")]
@@ -76,17 +93,12 @@ namespace SKladisteAppl.Controllers
             }
             try
             {
-                var izdatnica = _context.Izdatnice
-                    .Include(i => i.Osoba)
-                    .Include(i => i.Skladistar)
-                    .Include(i => i.Proizvodi)
-                    .ToList();
-                if (lista == null || lista.Count == 0)
-                   
+                var p = _context.Osobe.Find(sifra);
+                if (p == null)
                 {
                     return new EmptyResult();
                 }
-                return new JsonResult(izdatnica);
+                return new JsonResult(p);
             }
             catch (Exception ex)
             {
@@ -101,23 +113,23 @@ namespace SKladisteAppl.Controllers
         ///     POST api/v1/Izdatnica
         ///     {naziv: "Primjer naziva"}
         /// </remarks>
-        /// <param name="izdatnica">Izdatnica za unijeti u JSON formatu</param>
+        /// <param name="entitet">Izdatnica za unijeti u JSON formatu</param>
         /// <response code="201">Kreirano</response>
         /// <response code="400">Zahtjev nije valjan (BadRequest)</response> 
         /// <response code="503">Baza nedostupna iz razno raznih razloga</response> 
         /// <returns>Izdatnica s šifrom koju je dala baza</returns>
         [HttpPost]
-        public IActionResult Post(Izdatnica izdatnica)
+        public IActionResult Post(Izdatnica entitet)
         {
-            if (!ModelState.IsValid || izdatnica == null)
+            if (!ModelState.IsValid || entitet == null)
             {
                 return BadRequest();
             }
             try
             {
-                _context.Izdatnice.Add(izdatnica);
+                _context.Izdatnice.Add(entitet);
                 _context.SaveChanges();
-                return StatusCode(StatusCodes.Status201Created, izdatnica);
+                return StatusCode(StatusCodes.Status201Created, entitet);
             }
             catch (Exception ex)
             {
@@ -219,14 +231,14 @@ namespace SKladisteAppl.Controllers
 
             try
             {
-                var izdatnicaIzBaze = _context.Izdatnice.Find(sifra);
+                var entitetIzBaze = _context.Izdatnice.Find(sifra);
 
-                if (izdatnicaIzBaze == null)
+                if (entitetIzBaze == null)
                 {
                     return StatusCode(StatusCodes.Status204NoContent, sifra);
                 }
 
-                _context.Izdatnice.Remove(izdatnicaIzBaze);
+                _context.Izdatnice.Remove(entitetIzBaze);
                 _context.SaveChanges();
 
                 return new JsonResult("{\"poruka\": \"Obrisano\"}"); // ovo nije baš najbolja praksa ali da znake kako i to može
