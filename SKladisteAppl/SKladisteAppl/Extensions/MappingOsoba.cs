@@ -1,12 +1,12 @@
-﻿
+﻿using SKladisteAppl.Mappers;
 using SKladisteAppl.Models;
 
 namespace SKladisteAppl.Extensions
 {
    /// <summary>
-   /// mapiranje
+   /// Mapiranje osoba
    /// </summary>
-    public static class Mapping
+    public static class OsobaMapper
     {
         /// <summary>
         /// mapiranje liste
@@ -39,10 +39,14 @@ namespace SKladisteAppl.Extensions
         /// </summary>
         /// <param name="entitet"></param>
         /// <returns></returns>
-        public static Osoba MapOsobaInsertUpdateFromDTO(this OsobaDTOInsertUpdate entitet)
+        public static Osoba MapOsobaInsertUpdateFromDTO(this OsobaDTOInsertUpdate dto ,Osoba entitet)
         {
-            var mapper = OsobaMapper.InicijalizirajInsertUpdateFromDTO();
-            return mapper.Map<Osoba>(entitet);
+            entitet.Ime = dto.ime;
+            entitet.Prezime = dto.prezime;
+            entitet.BrojTelefona = dto.brojtelefona;
+            entitet.Email = dto.email;
+            return entitet;
+
         }
 
     }

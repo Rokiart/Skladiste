@@ -1,14 +1,12 @@
 ﻿using AutoMapper;
-
 using SKladisteAppl.Models;
 
-namespace SKladisteAppl.Extensions
-
-{ 
+namespace SKladisteAppl.Mappers
+{
     /// <summary>
-    /// maper
+    /// mapiranje proizvoda
     /// </summary>
-    public static class OsobaMapper
+    public class ProizvodMapper
     {
         /// <summary>
         /// inicijalizacija
@@ -19,7 +17,7 @@ namespace SKladisteAppl.Extensions
             return new Mapper(
                 new MapperConfiguration(c =>
                 {
-                    c.CreateMap<Osoba, OsobaDTORead>();
+                    c.CreateMap<Proizvod, ProizvodDTORead>();
                 })
                 );
         }
@@ -33,7 +31,7 @@ namespace SKladisteAppl.Extensions
             return new Mapper(
                 new MapperConfiguration(c =>
                 {
-                    c.CreateMap<OsobaDTORead ,Osoba>();
+                    c.CreateMap<ProizvodDTORead, Proizvod>();
                 })
                 );
         }
@@ -47,23 +45,9 @@ namespace SKladisteAppl.Extensions
             return new Mapper(
                 new MapperConfiguration(c =>
                 {
-                    c.CreateMap<Osoba, OsobaDTOInsertUpdate>();
+                    c.CreateMap<Proizvod, ProizvodDTOInsertUpdate>();
                 })
                 );
         }
-        ///// <summary>
-        ///// update iz DTO
-        ///// </summary>
-        ///// <returns></returns>
-
-        //public static Mapper InicijalizirajInsertUpdateFromDTO()
-        //{
-        //    return new Mapper(
-        //        new MapperConfiguration(c =>
-        //        {
-        //            c.CreateMap<OsobaDTOInsertUpdate, Osoba>();
-        //        })
-        //        );
-        //}
     }
 }

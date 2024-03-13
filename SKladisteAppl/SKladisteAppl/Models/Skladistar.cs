@@ -5,7 +5,7 @@ namespace SKladisteAppl.Models
     /// <summary>
     /// Ovo mi je POCO koji je mapiran na bazu
     /// </summary>
-    public class Skladistar : Entitet
+    public class Skladistar : Osoba
 
     {
         /// <summary>
