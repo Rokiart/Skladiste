@@ -55,12 +55,12 @@ namespace SKladisteAppl.Controllers
             }
             try
             {
-                var skladistari = _context.Skladistari.ToList();
-                if (skladistari == null || skladistari.Count == 0)
+                var lista = _context.Skladistari.ToList();
+                if (lista == null || lista.Count == 0)
                 {
                     return new EmptyResult();
                 }
-                return new JsonResult(skladistari);
+                return new JsonResult(lista.MapSkladistarReadLista());
             }
             catch (Exception ex)
             {
@@ -93,12 +93,12 @@ namespace SKladisteAppl.Controllers
             }
             try
             {
-                var skladistar = _context.Skladistari.Find(sifra);
-                if (skladistar == null)
+                var p = _context.Skladistari.Find(sifra);
+                if (p == null)
                 {
                     return new EmptyResult();
                 }
-                return new JsonResult(skladistar);
+                return new JsonResult(p.MapSkladistarInsertUpdatedToDTO());
             }
             catch (Exception ex)
             {
@@ -119,17 +119,18 @@ namespace SKladisteAppl.Controllers
         /// <response code="503">Baza nedostupna iz razno raznih razloga</response> 
         /// <returns>Skladistar s šifrom koju je dala baza</returns>
         [HttpPost]
-        public IActionResult Post(Skladistar entitet)
+        public IActionResult Post(SkladistarDTOInsertUpdate dto)
         {
-            if (!ModelState.IsValid || entitet == null)
+            if (!ModelState.IsValid || dto == null)
             {
                 return BadRequest();
             }
             try
             {
+                var entitet = dto.MapSkladistarInsertUpdateFromDTO(new Skladistar());
                 _context.Skladistari.Add(entitet);
                 _context.SaveChanges();
-                return StatusCode(StatusCodes.Status201Created, entitet);
+                return StatusCode(StatusCodes.Status201Created, entitet.MapSkladistarcReadToDTO());
             }
             catch (Exception ex)
             {
@@ -166,9 +167,9 @@ namespace SKladisteAppl.Controllers
 
         [HttpPut]
         [Route("{sifra:int}")]
-        public IActionResult Put(int sifra, Skladistar entitet)
+        public IActionResult Put(int sifra, SkladistarDTOInsertUpdate dto)
         {
-            if (sifra <= 0 || !ModelState.IsValid || entitet == null)
+            if (sifra <= 0 || !ModelState.IsValid || dto == null)
             {
                 return BadRequest();
             }
@@ -185,25 +186,32 @@ namespace SKladisteAppl.Controllers
                     return StatusCode(StatusCodes.Status204NoContent, sifra);
                 }
 
-
-                // inače ovo rade mapperi
-                // za sada ručno
-                entitetIzBaze.Ime = entitet.Ime;
-                entitetIzBaze.Prezime = entitet.Prezime;
-                entitetIzBaze.Email = entitet.Email;
-                entitetIzBaze.BrojTelefona = entitet.BrojTelefona;
+                try
+                {
 
 
-                _context.Skladistari.Update(entitetIzBaze);
-                _context.SaveChanges();
+                    var entitetIzBaze = _context.Skladistari.Find(sifra);
 
-                return StatusCode(StatusCodes.Status200OK,entitetIzBaze);
+                    if (entitetIzBaze == null)
+                    {
+                        return StatusCode(StatusCodes.Status204NoContent, sifra);
+                    }
+
+                    var entitet = dto.MapSkladistarInsertUpdateFromDTO(entitetIzBaze);
+
+                    _context.Skladistari.Update(entitetIzBaze);
+                    _context.SaveChanges();
+
+                    return StatusCode(StatusCodes.Status200OK, entitetIzBaze.MapSkladistarInsertUpdatedToDTO());
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status503ServiceUnavailable,
-                    ex.Message);
+                    return StatusCode(StatusCodes.Status503ServiceUnavailable,
+                        ex.Message);
             }
+
+
+            
 
         }
 

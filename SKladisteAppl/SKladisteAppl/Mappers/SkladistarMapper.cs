@@ -16,24 +16,24 @@ namespace SKladisteAppl.Mappers
         }
 
         public static Mapper InicijalizirajReadFromDTO()
-    {
-        return new Mapper(
-            new MapperConfiguration(c =>
-            {
-                c.CreateMap< SkladistarDTORead, Skladistar>();
-            })
-            );
-    }
+        {
+            return new Mapper(
+                new MapperConfiguration(c =>
+                {
+                    c.CreateMap<SkladistarDTORead, Skladistar>();
+                })
+                );
+        }
 
-    public static Mapper InicijalizirajInsertUpdateToDTO()
-    {
-        return new Mapper(
-            new MapperConfiguration(c =>
-            {
-                c.CreateMap<Skladistar, SkladistarDTOInsertUpdate>();
-            })
-            );
-    }
+        public static Mapper InicijalizirajInsertUpdateToDTO()
+        {
+            return new Mapper(
+                new MapperConfiguration(c =>
+                {
+                    c.CreateMap<Skladistar, SkladistarDTOInsertUpdate>();
+                })
+                );
+        }
 
-}
+    }
 }

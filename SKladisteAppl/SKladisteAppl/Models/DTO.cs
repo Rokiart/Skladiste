@@ -1,7 +1,7 @@
 ﻿namespace SKladisteAppl.Models
 {
     /// <summary>
-    /// osoba DTO read
+    /// osoba DTO učitaj
     /// </summary>
     /// <param name="sifra"></param>
     /// <param name="ime"></param>
@@ -40,7 +40,13 @@
     /// <param name="sifraproizvoda"></param>
     /// <param name="mjernajedinica"></param>
     public record ProizvodDTOInsertUpdate(string naziv, string sifraproizvoda,
-        string mjernajedinica);
+        string mjernajedinica)
+    {
+        internal Proizvod MapProizvodInsertUpdateFromDTO(Proizvod proizvod)
+        {
+            throw new NotImplementedException();
+        }
+    }
 
     /// <summary>
     /// skladistar DTO read
@@ -70,10 +76,23 @@
     /// <param name="Sifra"></param>
     /// <param name="BrojIzdatnice"></param>
     /// <param name="Datum"></param>
-    /// <param name="Osoba"></param>
-    /// <param name="Skladistar"></param>
+    /// <param name="OsobaImePrezime"></param>
+    /// <param name="SkladistarImePrezime"></param>
     /// <param name="Napomena"></param>
 
     public record IzdatnicaDTORead(int Sifra, string BrojIzdatnice,
-        DateTime Datum, int Osoba, int Skladistar,string Napomena);
+        DateTime Datum, string OsobaImePrezime, string SkladistarImePrezime, string Napomena);
+    /// <summary>
+    /// Izdatnica DTO update
+    /// </summary>
+    /// <param name="Sifra"></param>
+    /// <param name="BrojIzdatnice"></param>
+    /// <param name="Datum"></param>
+    /// <param name="Osobasifra"></param>
+    /// <param name="Skladistarsifra"></param>
+    /// <param name="Napomena"></param>
+
+    public record IzdatnicaDTOInsertUpdate(int Sifra, string BrojIzdatnice,
+        DateTime Datum, int Osobasifra, string Skladistarsifra, string Napomena);
 }
+

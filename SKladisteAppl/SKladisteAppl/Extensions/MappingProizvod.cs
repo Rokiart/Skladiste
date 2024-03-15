@@ -8,11 +8,6 @@ namespace SKladisteAppl.Extensions
     /// </summary>
     public class MappingProizvod
     {
-        /// <summary>
-        /// mapiranje liste
-        /// </summary>
-        /// <param name="lista"></param>
-        /// <returns></returns>
 
         public static List<ProizvodDTORead> MapProizvodReadList(this List<Proizvod> lista)
         {
@@ -23,29 +18,26 @@ namespace SKladisteAppl.Extensions
             });
             return vrati;
         }
-        /// <summary>
-        /// mapiranje entiteta
-        /// </summary>
-        /// <param name="entitet"></param>
-        /// <returns></returns>
 
-        public static ProizvodDTORead MapOsobaReadToDTO(this Proizvod entitet)
+        public static ProizvodDTORead MapSmjerReadToDTO(this Proizvod entitet)
         {
             var mapper = ProizvodMapper.InicijalizirajReadToDTO();
             return mapper.Map<ProizvodDTORead>(entitet);
         }
-        /// <summary>
-        /// mapiranje Proizvoda
-        /// </summary>
-        /// <param name="entitet"></param>
-        /// <returns></returns>
+
+        public static ProizvodDTOInsertUpdate MapSmjerInsertUpdatedToDTO(this Proizvod entitet)
+        {
+            var mapper = ProizvodMapper.InicijalizirajInsertUpdateToDTO();
+            return mapper.Map<ProizvodDTOInsertUpdate>(entitet);
+        }
+
         public static Proizvod MapProizvodInsertUpdateFromDTO(this ProizvodDTOInsertUpdate dto, Proizvod entitet)
         {
             entitet.Naziv = dto.naziv;
             entitet.Sifraproizvoda = dto.sifraproizvoda;
             entitet.Mjernajedinica = dto.mjernajedinica;
+           
             return entitet;
-
         }
     }
 }

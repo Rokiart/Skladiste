@@ -94,7 +94,7 @@ namespace SKladisteAppl.Controllers
                 {
                     return new EmptyResult();
                 }
-                return new JsonResult(proizvod);
+                return new JsonResult(proizvod.MapProizvodInsertUpdatedToDTO());
             }
             catch (Exception ex)
             {
@@ -116,17 +116,18 @@ namespace SKladisteAppl.Controllers
         /// <response code="503">Baza nedostupna iz razno raznih razloga</response> 
         /// <returns>Smjer s šifrom koju je dala baza</returns>
         [HttpPost]
-        public IActionResult Post(Proizvod proizvod)
+        public IActionResult Post(ProizvodDTOInsertUpdate dto)
         {
-            if (!ModelState.IsValid || proizvod == null)
+            if (!ModelState.IsValid || dto == null)
             {
                 return BadRequest();
             }
             try
             {
-                _context.Proizvodi.Add(proizvod);
+                var entitet = dto.MapProizvodInsertUpdateFromDTO(new Proizvod());
+                _context.Proizvodi.Add(entitet);
                 _context.SaveChanges();
-                return StatusCode(StatusCodes.Status201Created, proizvod);
+                return StatusCode(StatusCodes.Status201Created, entitet.MapProizvodReadToDTO());
             }
             catch (Exception ex)
             {
@@ -162,9 +163,9 @@ namespace SKladisteAppl.Controllers
 
         [HttpPut]
         [Route("{sifra:int}")]
-        public IActionResult Put(int sifra, Proizvod proizvod)
+        public IActionResult Put(int sifra, ProizvodDTOInsertUpdate dto)
         {
-            if (sifra <= 0 || !ModelState.IsValid || proizvod == null)
+            if (sifra <= 0 || !ModelState.IsValid || dto == null)
             {
                 return BadRequest();
             }
@@ -174,25 +175,21 @@ namespace SKladisteAppl.Controllers
             {
 
 
-                var proizvodIzBaze = _context.Proizvodi.Find(sifra);
+                var entitetIzBaze = _context.Proizvodi.Find(sifra);
 
-                if (proizvodIzBaze == null)
+                if (entitetIzBaze == null)
                 {
                     return StatusCode(StatusCodes.Status204NoContent, sifra);
                 }
 
-
-                // inače ovo rade mapperi
-                // za sada ručno
-                proizvodIzBaze.Naziv = proizvod.Naziv;
-                proizvodIzBaze.Sifraproizvoda = proizvod.Sifraproizvoda;
-                proizvodIzBaze.Mjernajedinica = proizvod.Mjernajedinica;
+                entitetIzBaze = dto.MapProizvodInsertUpdateFromDTO(entitetIzBaze);
 
 
-                _context.Proizvodi.Update(proizvodIzBaze);
+                _context.Proizvodi.Update(entitetIzBaze);
                 _context.SaveChanges();
 
-                return StatusCode(StatusCodes.Status200OK, proizvodIzBaze);
+                return StatusCode(StatusCodes.Status200OK,
+                    entitetIzBaze.MapPolaznikInsertUpdatedToDTO());
             }
             catch (Exception ex)
             {

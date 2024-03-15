@@ -1,8 +1,10 @@
 ﻿using SKladisteAppl.Data;
 using SKladisteAppl.Models;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Data.SqlClient;
+
 using Microsoft.EntityFrameworkCore;
+using SKladisteAppl.Extensions;
+
 
 
 namespace SKladisteAppl.Controllers
@@ -60,7 +62,7 @@ namespace SKladisteAppl.Controllers
                 {
                     return new EmptyResult();
                 }
-                return new JsonResult(lista);
+                return new JsonResult(lista.MapIzdatnicaReadList());
             }
             catch (Exception ex)
             {
@@ -93,7 +95,8 @@ namespace SKladisteAppl.Controllers
             }
             try
             {
-                var p = _context.Osobe.Find(sifra);
+                var p = _context.Izdatnice.Include(i => i.Osobe).Include(i => i.Skladistar)
+                    .Include(i => i.Proizvodi).FirstOrDefault(x => x.Sifra == sifra);
                 if (p == null)
                 {
                     return new EmptyResult();
@@ -121,15 +124,37 @@ namespace SKladisteAppl.Controllers
         [HttpPost]
         public IActionResult Post(Izdatnica entitet)
         {
-            if (!ModelState.IsValid || entitet == null)
+            if (!ModelState.IsValid || dto == null)
             {
                 return BadRequest();
             }
+
+            var osoba = _context.Izdatnice.Find(dto.OsobaSifra);
+
+            if (osoba == null)
+            {
+                return BadRequest();
+            }
+
+            var skladistar = _context.Skladistari.Find(dto.skladistarSifra);
+
+            if (skladistar == null)
+            {
+                return BadRequest();
+            }
+
+
+            var entitet = dto.MapIzdatnicaInsertUpdateFromDTO(new Izdatnica());
+
+            entitet.Osoba = osoba;
+            entitet.Skladistar = skladistar;
+
+
             try
             {
                 _context.Izdatnice.Add(entitet);
                 _context.SaveChanges();
-                return StatusCode(StatusCodes.Status201Created, entitet);
+                return StatusCode(StatusCodes.Status201Created, entitet.MapIzdatnicaReadToDTO());
             }
             catch (Exception ex)
             {
@@ -163,48 +188,61 @@ namespace SKladisteAppl.Controllers
         ///// <response code="503">Baza nedostupna</response> 
 
 
-        //[HttpPut]
-        //[Route("{sifra:int}")]
-        //public IActionResult Put(int sifra, Izdatnica izdatnica)
-        //{
-        //    if (sifra <= 0 || !ModelState.IsValid || izdatnica == null)
-        //    {
-        //        return BadRequest();
-        //    }
+        [HttpPut]
+        [Route("{sifra:int}")]
+        public IActionResult Put(int sifra, IzdatnicaDTOInsertUpdate dto)
+        {
+            if (sifra <= 0 || !ModelState.IsValid || dto == null)
+            {
+                return BadRequest();
+            }
 
 
-        //    try
-        //    {
+            try
+            {
 
 
-        //        var izdatnicaIzBaze = _context.Izdatnice.Find(sifra);
+                var entitet = _context.Izdatnice.Include(i => i.Osoba).Include(i => i.Skladistar)
+                    .Include(i => i.Proizvodi).FirstOrDefault(x => x.Sifra == sifra);
 
-        //        if (izdatnicaIzBaze == null)
-        //        {
-        //            return StatusCode(StatusCodes.Status204NoContent, sifra);
-        //        }
+                if (entitet == null)
+                {
+                    return StatusCode(StatusCodes.Status204NoContent, sifra);
+                }
+
+                var osoba = _context.Osobe.Find(dto.osobaSifra);
+
+                if (osoba == null)
+                {
+                    return BadRequest();
+                }
+
+                var skladistar = _context.Skladistari.Find(dto.skladistarSifra);
+
+                if (skladistar == null)
+                {
+                    return BadRequest();
+                }
 
 
-        //        // inače ovo rade mapperi
-        //        // za sada ručno
-        //        izdatnicaIzBaze.BrojIzdatnice = izdatnica.BrojIzdatnice;
-        //        izdatnicaIzBaze.Datum = izdatnica.Datum;
-        //        //izdatnicaIzBaze.Kolicina = izdatnica.kolicina;
-        //        izdatnicaIzBaze.Napomena = izdatnica.Napomena;
+                entitet = dto.MapGrupaInsertUpdateFromDTO(entitet);
+
+                entitet.Osoba = osoba;
+                entitet.Skladistar = skladistar;
 
 
-        //        _context.Izdatnice.Update(izdatnicaIzBaze);
-        //        _context.SaveChanges();
+                _context.Izdatnice.Update(entitet);
+                _context.SaveChanges();
 
-        //        return StatusCode(StatusCodes.Status200OK, izdatnicaIzBaze);
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return StatusCode(StatusCodes.Status503ServiceUnavailable,
-        //            ex.Message);
-        //    }
+                return StatusCode(StatusCodes.Status200OK, entitet.MapIzdatnicaReadtoDTO());
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status503ServiceUnavailable,
+                    ex.Message);
+            }
 
-        //}
+        }
         /// <summary>
         /// Briše izdatnicu iz baze
         /// </summary>

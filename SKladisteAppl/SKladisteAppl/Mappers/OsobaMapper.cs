@@ -10,10 +10,6 @@ namespace SKladisteAppl.Extensions
     /// </summary>
     public static class OsobaMapper
     {
-        /// <summary>
-        /// inicijalizacija
-        /// </summary>
-        /// <returns></returns>
         public static Mapper InicijalizirajReadToDTO()
         {
             return new Mapper(
@@ -23,24 +19,16 @@ namespace SKladisteAppl.Extensions
                 })
                 );
         }
-        /// <summary>
-        /// read inicijalizacije
-        /// </summary>
-        /// <returns></returns>
 
         public static Mapper InicijalizirajReadFromDTO()
         {
             return new Mapper(
                 new MapperConfiguration(c =>
                 {
-                    c.CreateMap<OsobaDTORead ,Osoba>();
+                    c.CreateMap<OsobaDTORead, Osoba>();
                 })
                 );
         }
-        /// <summary>
-        /// update
-        /// </summary>
-        /// <returns></returns>
 
         public static Mapper InicijalizirajInsertUpdateToDTO()
         {
@@ -51,19 +39,5 @@ namespace SKladisteAppl.Extensions
                 })
                 );
         }
-        ///// <summary>
-        ///// update iz DTO
-        ///// </summary>
-        ///// <returns></returns>
-
-        //public static Mapper InicijalizirajInsertUpdateFromDTO()
-        //{
-        //    return new Mapper(
-        //        new MapperConfiguration(c =>
-        //        {
-        //            c.CreateMap<OsobaDTOInsertUpdate, Osoba>();
-        //        })
-        //        );
-        //}
     }
 }

@@ -31,5 +31,9 @@ namespace SKladisteAppl.Models
 
         public ICollection<Izdatnica>? Izdatnice { get; set; } = new List<Izdatnica>();
 
+        internal object? MapProizvodInsertUpdatedToDTO()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

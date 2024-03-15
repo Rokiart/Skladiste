@@ -52,12 +52,12 @@ namespace SKladisteAppl.Controllers
             }
             try
             {
-                var Osobe = _context.Osobe.ToList();
-                if (Osobe == null || Osobe.Count == 0)
+                var lista = _context.Osobe.ToList();
+                if (lista == null || lista.Count == 0)
                 {
                     return new EmptyResult();
                 }
-                return new JsonResult(Osobe);
+                return new JsonResult(lista.MapOsobaReadList());
             }
             catch (Exception ex)
             {
@@ -164,9 +164,9 @@ namespace SKladisteAppl.Controllers
         /// <response code="503">Baza nedostupna</response> 
         [HttpPut]
         [Route("{sifra:int}")]
-        public IActionResult Put(int sifra, OsobaDTOInsertUpdate osobaDTO)
+        public IActionResult Put(int sifra, OsobaDTOInsertUpdate dto)
         {
-            if (sifra <= 0 || !ModelState.IsValid || osobaDTO == null)
+            if (sifra <= 0 || !ModelState.IsValid || dto == null)
             {
                 return BadRequest();
             }
@@ -176,19 +176,19 @@ namespace SKladisteAppl.Controllers
             {
 
 
-                var osobaIzBaze = _context.Osobe.Find(sifra);
+                var entitetIzBaze = _context.Osobe.Find(sifra);
 
-                if (osobaIzBaze == null)
+                if (entitetIzBaze == null)
                 {
                     return StatusCode(StatusCodes.Status204NoContent, sifra);
                 }
 
+                var entitet = dto.MapOsobaInsertUpdateFromDTO(entitetIzBaze);
 
-            
-                _context.Osobe.Update(osobaIzBaze);
+                _context.Osobe.Update(entitetIzBaze);
                 _context.SaveChanges();
 
-                return StatusCode(StatusCodes.Status200OK, osoba,MapOsobaReadToDTO() ) ;
+                return StatusCode(StatusCodes.Status200OK, entitetIzBaze.MapOsobaInsertUpdatedToDTO());
             }
             catch (Exception ex)
             {
@@ -224,14 +224,14 @@ namespace SKladisteAppl.Controllers
 
             try
             {
-                var osobaIzbaze = _context.Osobe.Find(sifra);
+                var entitetIzbaze = _context.Osobe.Find(sifra);
 
-                if (osobaIzbaze == null)
+                if (entitetIzbaze == null)
                 {
                     return StatusCode(StatusCodes.Status204NoContent, sifra);
                 }
 
-                _context.Osobe.Remove(osobaIzbaze);
+                _context.Osobe.Remove(entitetIzbaze);
                 _context.SaveChanges();
 
                 return new JsonResult("{\"poruka\": \"Obrisano\"}"); // ovo nije baš najbolja praksa ali da znake kako i to može

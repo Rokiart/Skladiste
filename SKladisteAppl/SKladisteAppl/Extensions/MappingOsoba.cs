@@ -34,12 +34,17 @@ namespace SKladisteAppl.Extensions
             var mapper = OsobaMapper.InicijalizirajReadToDTO();
             return mapper.Map<OsobaDTORead>(entitet);
         }
-        /// <summary>
-        /// mapiranje osobe
-        /// </summary>
-        /// <param name="entitet"></param>
-        /// <returns></returns>
-        public static Osoba MapOsobaInsertUpdateFromDTO(this OsobaDTOInsertUpdate dto ,Osoba entitet)
+
+        public static OsobaDTOInsertUpdate MapOsobaInsertUpdatedToDTO(this Osoba entitet)
+        {
+            var mapper = OsobaMapper.InicijalizirajInsertUpdateToDTO();
+            return mapper.Map<OsobaDTOInsertUpdate>(entitet);
+            /// <summary>
+            /// mapiranje osobe
+            /// </summary>
+            /// <param name="entitet"></param>
+            /// <returns></returns>
+            public static Osoba MapOsobaInsertUpdateFromDTO(this OsobaDTOInsertUpdate dto ,Osoba entitet)
         {
             entitet.Ime = dto.ime;
             entitet.Prezime = dto.prezime;
