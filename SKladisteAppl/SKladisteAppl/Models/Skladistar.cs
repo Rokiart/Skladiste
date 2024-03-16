@@ -3,32 +3,11 @@
 namespace SKladisteAppl.Models
 {
     /// <summary>
-    /// Ovo mi je POCO koji je mapiran na bazu
+    /// Predstavlja skladištara u sustavu skladišta.
     /// </summary>
-    public class Skladistar : Entitet
-
+    public class Skladistar : Covjek
     {
-        /// <summary>
-        /// Ime u bazi
-        /// </summary>
-        [Required(ErrorMessage = "Ime obavezno")]
-        public string? Ime { get; set; }
-        /// <summary>
-        /// Prezime u bazi
-        /// </summary>
-        [Required(ErrorMessage = "Prezime obavezno")]
-        public string? Prezime { get; set; }
-        /// <summary>
-        /// Email u bazi
-        /// </summary>
-        public string? Email { get; set; }
-        /// <summary>
-        /// Broj Telefona u bazi
-        /// </summary>
-        public string? BrojTelefona { get; set; }
-
-       
-
+        // Dodatna svojstva moguće dodati ovdje
 
     }
 }

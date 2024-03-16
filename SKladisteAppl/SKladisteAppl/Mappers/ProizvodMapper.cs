@@ -4,14 +4,14 @@ using SKladisteAppl.Models;
 namespace SKladisteAppl.Mappers
 {
     /// <summary>
-    /// mapiranje proizvoda
+    /// Klasa za mapiranje podataka o proizvodima.
     /// </summary>
     public class ProizvodMapper
     {
         /// <summary>
-        /// inicijalizacija
+        /// Metoda za inicijalizaciju mapiranja iz entiteta Proizvod u DTO za čitanje.
         /// </summary>
-        /// <returns></returns>
+        /// <returns>Mapper za mapiranje Proizvod u ProizvodDTORead</returns>
         public static Mapper InicijalizirajReadToDTO()
         {
             return new Mapper(
@@ -19,13 +19,13 @@ namespace SKladisteAppl.Mappers
                 {
                     c.CreateMap<Proizvod, ProizvodDTORead>();
                 })
-                );
+            );
         }
-        /// <summary>
-        /// read inicijalizacije
-        /// </summary>
-        /// <returns></returns>
 
+        /// <summary>
+        /// Metoda za inicijalizaciju mapiranja iz DTO za čitanje u entitet Proizvod.
+        /// </summary>
+        /// <returns>Mapper za mapiranje ProizvodDTORead u Proizvod</returns>
         public static Mapper InicijalizirajReadFromDTO()
         {
             return new Mapper(
@@ -33,13 +33,13 @@ namespace SKladisteAppl.Mappers
                 {
                     c.CreateMap<ProizvodDTORead, Proizvod>();
                 })
-                );
+            );
         }
-        /// <summary>
-        /// update
-        /// </summary>
-        /// <returns></returns>
 
+        /// <summary>
+        /// Metoda za inicijalizaciju mapiranja iz entiteta Proizvod u DTO za unos i ažuriranje.
+        /// </summary>
+        /// <returns>Mapper za mapiranje Proizvod u ProizvodDTOInsertUpdate</returns>
         public static Mapper InicijalizirajInsertUpdateToDTO()
         {
             return new Mapper(
@@ -47,7 +47,7 @@ namespace SKladisteAppl.Mappers
                 {
                     c.CreateMap<Proizvod, ProizvodDTOInsertUpdate>();
                 })
-                );
+            );
         }
     }
 }

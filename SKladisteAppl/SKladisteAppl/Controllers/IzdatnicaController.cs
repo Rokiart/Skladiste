@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 
 using Microsoft.EntityFrameworkCore;
 using SKladisteAppl.Extensions;
+using IzdatnicaDTOInsertUpdate = SKladisteAppl.Models.IzdatnicaDTOInsertUpdate;
 
 
 
@@ -95,7 +96,7 @@ namespace SKladisteAppl.Controllers
             }
             try
             {
-                var p = _context.Izdatnice.Include(i => i.Osobe).Include(i => i.Skladistar)
+                var p = _context.Izdatnice.Include(i => i.Osoba).Include(i => i.Skladistar)
                     .Include(i => i.Proizvodi).FirstOrDefault(x => x.Sifra == sifra);
                 if (p == null)
                 {
@@ -116,20 +117,20 @@ namespace SKladisteAppl.Controllers
         ///     POST api/v1/Izdatnica
         ///     {naziv: "Primjer naziva"}
         /// </remarks>
-        /// <param name="entitet">Izdatnica za unijeti u JSON formatu</param>
+        /// <param name="dto">Izdatnica za unijeti u JSON formatu</param>
         /// <response code="201">Kreirano</response>
         /// <response code="400">Zahtjev nije valjan (BadRequest)</response> 
         /// <response code="503">Baza nedostupna iz razno raznih razloga</response> 
         /// <returns>Izdatnica s šifrom koju je dala baza</returns>
         [HttpPost]
-        public IActionResult Post(Izdatnica entitet)
+        public IActionResult Post(IzdatnicaDTOInsertUpdate dto)
         {
             if (!ModelState.IsValid || dto == null)
             {
                 return BadRequest();
             }
 
-            var osoba = _context.Izdatnice.Find(dto.OsobaSifra);
+            var osoba = _context.Osobe.Find(dto.osobasifra);
 
             if (osoba == null)
             {
@@ -190,7 +191,7 @@ namespace SKladisteAppl.Controllers
 
         [HttpPut]
         [Route("{sifra:int}")]
-        public IActionResult Put(int sifra, IzdatnicaDTOInsertUpdate dto)
+        public IActionResult Put(int sifra, Models.IzdatnicaDTOInsertUpdate dto)
         {
             if (sifra <= 0 || !ModelState.IsValid || dto == null)
             {
@@ -210,7 +211,7 @@ namespace SKladisteAppl.Controllers
                     return StatusCode(StatusCodes.Status204NoContent, sifra);
                 }
 
-                var osoba = _context.Osobe.Find(dto.osobaSifra);
+                var osoba = _context.Osobe.Find(dto.osobasifra);
 
                 if (osoba == null)
                 {
@@ -225,7 +226,7 @@ namespace SKladisteAppl.Controllers
                 }
 
 
-                entitet = dto.MapGrupaInsertUpdateFromDTO(entitet);
+                entitet = dto.MapIzdatnicaInsertUpdateFromDTO(entitet);
 
                 entitet.Osoba = osoba;
                 entitet.Skladistar = skladistar;
@@ -234,7 +235,7 @@ namespace SKladisteAppl.Controllers
                 _context.Izdatnice.Update(entitet);
                 _context.SaveChanges();
 
-                return StatusCode(StatusCodes.Status200OK, entitet.MapIzdatnicaReadtoDTO());
+                return StatusCode(StatusCodes.Status200OK, entitet.MapIzdatnicaReadToDTO());
             }
             catch (Exception ex)
             {
@@ -288,6 +289,32 @@ namespace SKladisteAppl.Controllers
                     ex.Message);
             }
 
+        }
+
+        [HttpGet]
+        [Route("Proizvodi/{sifraGrupe:int}")]
+        public IActionResult GetProizvodi(int sifraIzdatnice)
+        {
+            // kontrola ukoliko upit nije valjan
+            if (!ModelState.IsValid || sifraIzdatnice <= 0)
+            {
+                return BadRequest(ModelState);
+            }
+            try
+            {
+                var p = _context.Izdatnice
+                    .Include(i => i.Proizvodi).FirstOrDefault(x => x.Sifra == sifraIzdatnice);
+                if (p == null)
+                {
+                    return new EmptyResult();
+                }
+                return new JsonResult(p.Proizvodi!.MapProizvodReadList());
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status503ServiceUnavailable,
+                    ex.Message);
+            }
         }
     }
 }

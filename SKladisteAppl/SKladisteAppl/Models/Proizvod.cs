@@ -1,39 +1,28 @@
-﻿
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
-
-namespace SKladisteAppl.Models
-
+﻿namespace SKladisteAppl.Models
 {
     /// <summary>
-    /// Ovo mi je POCO koji je mapiran na bazu
+    /// Predstavlja proizvod u sustavu skladišta.
     /// </summary>
     public class Proizvod : Entitet
     {
         /// <summary>
-        /// Naziv u bazi
+        /// Naziv proizvoda.
         /// </summary>
-        [Required(ErrorMessage = "Naziv obavezno")]
         public string? Naziv { get; set; }
+
         /// <summary>
-        /// Sifra proizvoda u bazi
+        /// Šifra proizvoda.
         /// </summary>
-        [Required(ErrorMessage = "Šifra proizvoda obavezno")]
         public string? Sifraproizvoda { get; set; }
+
         /// <summary>
-        /// Mjerna jedinica u bazi
+        /// Mjerna jedinica proizvoda.
         /// </summary>
-        [Required(ErrorMessage = "mjerna jedinica obavezno")]
         public string? Mjernajedinica { get; set; }
+
         /// <summary>
-        /// spajanje ključeva
+        /// Izdatnice koje sadrže ovaj proizvod.
         /// </summary>
-
         public ICollection<Izdatnica>? Izdatnice { get; set; } = new List<Izdatnica>();
-
-        internal object? MapProizvodInsertUpdatedToDTO()
-        {
-            throw new NotImplementedException();
-        }
     }
 }

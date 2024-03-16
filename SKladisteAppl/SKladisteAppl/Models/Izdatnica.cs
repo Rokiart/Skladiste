@@ -1,44 +1,45 @@
-﻿
-using System.ComponentModel.DataAnnotations;
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace SKladisteAppl.Models
 {
     /// <summary>
-    /// Ovo mi je POCO koji je mapiran na bazu
+    /// Predstavlja izdatnicu u sustavu skladišta.
     /// </summary>
     public class Izdatnica : Entitet
-
     {
+        /// <summary>
+        /// Broj izdatnice u bazi podataka.
+        /// </summary>
+        public string? BrojIzdatnice { get; set; }
 
         /// <summary>
-        /// Broj izdatnice u bazi
-        /// </summary>
-        [Required(ErrorMessage = "Broj izdatnice obavezno")]
-        public string? BrojIzdatnice { get; set; }
-        /// <summary>
-        /// datum izdatnice u bazi
+        /// Datum izdatnice u bazi podataka.
         /// </summary>
         public DateTime? Datum { get; set; }
+
         /// <summary>
-        /// Vanjski kljuc za osobu
+        /// Osoba koja je izdala izdatnicu.
         /// </summary>
         [ForeignKey("osoba")]
         public Osoba? Osoba { get; set; }
+
         /// <summary>
-        /// Vanjski kljuc za skladistara
+        /// Skladištar koji je povezan s izdatnicom.
         /// </summary>
         [ForeignKey("skladistar")]
         public Skladistar? Skladistar { get; set; }
+
         /// <summary>
-        /// Napomena max 250 karaktera u bazi
+        /// Napomena uz izdatnicu, maksimalno 250 karaktera.
         /// </summary>
         public string? Napomena { get; set; }
+
         /// <summary>
-        /// ključ više na više
+        /// Lista proizvoda koji su vezani uz izdatnicu.
         /// </summary>
-
-        public List<Proizvod>? Proizvodi{ get; set; }
-
+        public List<Proizvod>? Proizvodi { get; set; }
+        public string? Proizvod { get; internal set; }
     }
 }

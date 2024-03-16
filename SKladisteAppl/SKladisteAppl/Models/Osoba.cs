@@ -1,37 +1,11 @@
-﻿
-
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
-
-namespace SKladisteAppl.Models
+﻿namespace SKladisteAppl.Models
 {
-
     /// <summary>
-    /// Ovo mi je POCO koji je mapiran na bazu
+    /// Predstavlja osobu u sustavu skladišta.
     /// </summary>
-    public class Osoba:Entitet
+    public class Osoba : Covjek
     {
-        /// <summary>
-        /// Ime u bazi
-        /// </summary>
-        [Required(ErrorMessage = "Ime obavezno")]
-        public string? Ime{ get; set; }
-        /// <summary>
-        /// Prezime u bazi
-        /// </summary>
-        [Required(ErrorMessage = "Prezime obavezno")]
-        public string? Prezime{ get; set; }
-        /// <summary>
-        /// Email u bazi
-        /// </summary>
-        public string? Email{ get; set; }
-        /// <summary>
-        /// Broj Telefona u bazi
-        /// </summary>
-        public string? BrojTelefona{ get; set; }
-
-      
-
-
+        // Ova klasa nasljeđuje svojstva iz klase Covjek, kao što su Ime, Prezime, Email i BrojTelefona.
+        // Dodatna svojstva ili metode mogu se dodati ovdje ako su specifična za osobu u sustavu skladišta.
     }
 }

@@ -1,10 +1,10 @@
 ﻿using SKladisteAppl.Models;
-using AutoMapper;
+
 using SKladisteAppl.Mappers;
 
 namespace SKladisteAppl.Extensions
 {
-    public class MappingSKladistar
+    public static class MappingSKladistar
     {
 
 
@@ -36,13 +36,13 @@ namespace SKladisteAppl.Extensions
         public static Skladistar MapSkladistarInsertUpdateFromDTO(this SkladistarDTOInsertUpdate dto, Skladistar entitet)
         {
             entitet.Ime = dto.ime;
-            entitet.Prezime = dto.Prezime;
-            entitet.BrojTelefona = dto.BrojTelefona;
-            entitet.Email = dto.Email;
+            entitet.Prezime = dto.prezime;
+            entitet.BrojTelefona = dto.brojtelefona;
+            entitet.Email = dto.email;
 
             return entitet;
         }
 
     }
-        
+
 }

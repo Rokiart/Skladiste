@@ -111,27 +111,28 @@ namespace SKladisteAppl.Controllers
         ///     POST api/v1/Osoba
         ///     {naziv: "Primjer naziva"}
         /// </remarks>
-        /// <param name="osobaDTO">Osoba za unijeti u JSON formatu</param>
+        /// <param name="dto">Osoba za unijeti u JSON formatu</param>
         /// <response code="201">Kreirano</response>
         /// <response code="400">Zahtjev nije valjan (BadRequest)</response> 
         /// <response code="503">Baza nedostupna iz razno raznih razloga</response> 
         /// <returns>Osoba s šifrom koju je dala baza</returns>
         [HttpPost]
-        public IActionResult Post(OsobaDTOInsertUpdate osobaDTO)
+        public IActionResult Post(OsobaDTOInsertUpdate dto)
         {
-            if (!ModelState.IsValid || osobaDTO == null)
+            if (!ModelState.IsValid || dto == null)
             {
                 return BadRequest();
             }
             try
             {
-                var osoba = osobaDTO.MapOsobaInsertUpdateFromDTO(new Osoba());
-                _context.Osobe.Add(osoba);
+                var entitet = dto.MapOsobaInsertUpdateFromDTO(new Osoba());
+                _context.Osobe.Add(entitet);
                 _context.SaveChanges();
-                return StatusCode(StatusCodes.Status201Created, 
-                    osoba.MapOsobaReadToDTO());
-            }
-            catch (Exception ex)
+                return StatusCode(StatusCodes.Status201Created, entitet.MapOsobaReadToDTO());
+
+            }catch (Exception ex)
+            
+
             {
                 return StatusCode(StatusCodes.Status503ServiceUnavailable,
                     ex.Message);
@@ -156,7 +157,7 @@ namespace SKladisteAppl.Controllers
         ///
         /// </remarks>
         /// <param name="sifra">Šifra osobe koji se mijenja</param>  
-        /// <param name="osobaDTO">Osoba za unijeti u JSON formatu</param>  
+        /// <param name="dto">Osoba za unijeti u JSON formatu</param>  
         /// <returns>Svi poslani podaci od osoba koji su spremljeni u bazi</returns>
         /// <response code="200">Sve je u redu</response>
         /// <response code="204">Nema u bazi osobe kojeu želimo promijeniti</response>

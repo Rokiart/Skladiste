@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using SKladisteAppl.Models;
 using Microsoft.Data.SqlClient;
+using SKladisteAppl.Extensions;
 
 namespace SKladisteAppl.Controllers
 {
@@ -49,12 +50,12 @@ namespace SKladisteAppl.Controllers
             }
             try
             {
-                var proizvodi = _context.Proizvodi.ToList();
-                if (proizvodi == null || proizvodi.Count == 0)
+                var lista = _context.Proizvodi.ToList();
+                if (lista == null || lista.Count == 0)
                 {
                     return new EmptyResult();
                 }
-                return new JsonResult(proizvodi);
+                return new JsonResult(lista.MapProizvodReadList());
             }
             catch (Exception ex)
             {
@@ -89,12 +90,12 @@ namespace SKladisteAppl.Controllers
             }
             try
             {
-                var proizvod = _context.Proizvodi.Find(sifra);
-                if (proizvod == null)
+                var p = _context.Proizvodi.Find(sifra);
+                if (p == null)
                 {
                     return new EmptyResult();
                 }
-                return new JsonResult(proizvod.MapProizvodInsertUpdatedToDTO());
+                return new JsonResult(p.MapProizvodInsertUpdatedToDTO());
             }
             catch (Exception ex)
             {
@@ -110,11 +111,11 @@ namespace SKladisteAppl.Controllers
         ///     POST api/v1/Proizvod
         ///     {naziv: "Primjer proizvoda"}
         /// </remarks>
-        /// <param name="proizvod">Proizvod za unijeti u JSON formatu</param>
+        /// <param name="dto">Proizvod za unijeti u JSON formatu</param>
         /// <response code="201">Kreirano</response>
         /// <response code="400">Zahtjev nije valjan (BadRequest)</response> 
         /// <response code="503">Baza nedostupna iz razno raznih razloga</response> 
-        /// <returns>Smjer s šifrom koju je dala baza</returns>
+        /// <returns>Proizvod s šifrom koju je dala baza</returns>
         [HttpPost]
         public IActionResult Post(ProizvodDTOInsertUpdate dto)
         {
@@ -153,7 +154,7 @@ namespace SKladisteAppl.Controllers
         ///
         /// </remarks>
         /// <param name="sifra">Šifra proizvoda koji se mijenja</param>  
-        /// <param name="proizvod">Proizvod za unijeti u JSON formatu</param>  
+        /// <param name="dto">Proizvod za unijeti u JSON formatu</param>  
         /// <returns>Svi poslani podaci od proizvoda koji su spremljeni u bazi</returns>
         /// <response code="200">Sve je u redu</response>
         /// <response code="204">Nema u bazi proizvoda kojeg želimo promijeniti</response>
@@ -189,7 +190,7 @@ namespace SKladisteAppl.Controllers
                 _context.SaveChanges();
 
                 return StatusCode(StatusCodes.Status200OK,
-                    entitetIzBaze.MapPolaznikInsertUpdatedToDTO());
+                    entitetIzBaze.MapProizvodInsertUpdatedToDTO());
             }
             catch (Exception ex)
             {
@@ -211,7 +212,7 @@ namespace SKladisteAppl.Controllers
         /// <param name="sifra">Šifra proizvoda koji se briše</param>  
         /// <returns>Odgovor da li je obrisano ili ne</returns>
         /// <response code="200">Sve je u redu, obrisano je u bazi</response>
-        /// <response code="204">Nema u bazi smjera kojeg želimo obrisati</response>
+        /// <response code="204">Nema u bazi proizvoda kojeg želimo obrisati</response>
         /// <response code="503">Problem s bazom</response> 
         [HttpDelete]
         [Route("{sifra:int}")]

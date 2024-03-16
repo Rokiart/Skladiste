@@ -3,10 +3,10 @@ using SKladisteAppl.Models;
 
 namespace SKladisteAppl.Extensions
 {
-   /// <summary>
-   /// Mapiranje osoba
-   /// </summary>
-    public static class OsobaMapper
+    /// <summary>
+    /// Mapiranje osoba
+    /// </summary>
+    public static class MappingOsoba
     {
         /// <summary>
         /// mapiranje liste
@@ -23,11 +23,11 @@ namespace SKladisteAppl.Extensions
             });
             return vrati;
         }
-       /// <summary>
-       /// mapiranje entiteta
-       /// </summary>
-       /// <param name="entitet"></param>
-       /// <returns></returns>
+        /// <summary>
+        /// mapiranje entiteta
+        /// </summary>
+        /// <param name="entitet"></param>
+        /// <returns></returns>
 
         public static OsobaDTORead MapOsobaReadToDTO(this Osoba entitet)
         {
@@ -39,12 +39,13 @@ namespace SKladisteAppl.Extensions
         {
             var mapper = OsobaMapper.InicijalizirajInsertUpdateToDTO();
             return mapper.Map<OsobaDTOInsertUpdate>(entitet);
-            /// <summary>
-            /// mapiranje osobe
-            /// </summary>
-            /// <param name="entitet"></param>
-            /// <returns></returns>
-            public static Osoba MapOsobaInsertUpdateFromDTO(this OsobaDTOInsertUpdate dto ,Osoba entitet)
+        }
+        /// <summary>
+        /// mapiranje osobe
+        /// </summary>
+        /// <param name="entitet"></param>
+        /// <returns></returns>
+        public static Osoba MapOsobaInsertUpdateFromDTO(this OsobaDTOInsertUpdate dto, Osoba entitet)
         {
             entitet.Ime = dto.ime;
             entitet.Prezime = dto.prezime;

@@ -6,7 +6,7 @@ namespace SKladisteAppl.Extensions
     /// <summary>
     /// 
     /// </summary>
-    public class MappingProizvod
+    public static class MappingProizvod
     {
 
         public static List<ProizvodDTORead> MapProizvodReadList(this List<Proizvod> lista)
@@ -19,13 +19,13 @@ namespace SKladisteAppl.Extensions
             return vrati;
         }
 
-        public static ProizvodDTORead MapSmjerReadToDTO(this Proizvod entitet)
+        public static ProizvodDTORead MapProizvodReadToDTO(this Proizvod entitet)
         {
             var mapper = ProizvodMapper.InicijalizirajReadToDTO();
             return mapper.Map<ProizvodDTORead>(entitet);
         }
 
-        public static ProizvodDTOInsertUpdate MapSmjerInsertUpdatedToDTO(this Proizvod entitet)
+        public static ProizvodDTOInsertUpdate MapProizvodInsertUpdatedToDTO(this Proizvod entitet)
         {
             var mapper = ProizvodMapper.InicijalizirajInsertUpdateToDTO();
             return mapper.Map<ProizvodDTOInsertUpdate>(entitet);
@@ -36,7 +36,7 @@ namespace SKladisteAppl.Extensions
             entitet.Naziv = dto.naziv;
             entitet.Sifraproizvoda = dto.sifraproizvoda;
             entitet.Mjernajedinica = dto.mjernajedinica;
-           
+
             return entitet;
         }
     }

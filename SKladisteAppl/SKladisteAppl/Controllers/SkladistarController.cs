@@ -2,6 +2,7 @@
 using SKladisteAppl.Data;
 using SKladisteAppl.Models;
 using Microsoft.Data.SqlClient;
+using SKladisteAppl.Extensions;
 
 namespace SKladisteAppl.Controllers
 {
@@ -60,7 +61,7 @@ namespace SKladisteAppl.Controllers
                 {
                     return new EmptyResult();
                 }
-                return new JsonResult(lista.MapSkladistarReadLista());
+                return new JsonResult(lista.MapSkladistarReadList());
             }
             catch (Exception ex)
             {
@@ -113,7 +114,7 @@ namespace SKladisteAppl.Controllers
         ///     POST api/v1/Skladištar
         ///     {naziv: "Primjer naziva"}
         /// </remarks>
-        /// <param name="entitet">Skladistar za unijeti u JSON formatu</param>
+        /// <param name="dto">Skladistar za unijeti u JSON formatu</param>
         /// <response code="201">Kreirano</response>
         /// <response code="400">Zahtjev nije valjan (BadRequest)</response> 
         /// <response code="503">Baza nedostupna iz razno raznih razloga</response> 
@@ -130,7 +131,7 @@ namespace SKladisteAppl.Controllers
                 var entitet = dto.MapSkladistarInsertUpdateFromDTO(new Skladistar());
                 _context.Skladistari.Add(entitet);
                 _context.SaveChanges();
-                return StatusCode(StatusCodes.Status201Created, entitet.MapSkladistarcReadToDTO());
+                return StatusCode(StatusCodes.Status201Created, entitet.MapSkladistarReadToDTO());
             }
             catch (Exception ex)
             {
@@ -157,7 +158,7 @@ namespace SKladisteAppl.Controllers
         ///
         /// </remarks>
         /// <param name="sifra">Šifra skladistara koji se mijenja</param>  
-        /// <param name="entitet">Skladistar za unijeti u JSON formatu</param>  
+        /// <param name="dto">Skladistar za unijeti u JSON formatu</param>  
         /// <returns>Svi poslani podaci od skladistara koji su spremljeni u bazi</returns>
         /// <response code="200">Sve je u redu</response>
         /// <response code="204">Nema u bazi osobe kojeu želimo promijeniti</response>
@@ -174,11 +175,8 @@ namespace SKladisteAppl.Controllers
                 return BadRequest();
             }
 
-
             try
             {
-
-
                 var entitetIzBaze = _context.Skladistari.Find(sifra);
 
                 if (entitetIzBaze == null)
@@ -186,33 +184,18 @@ namespace SKladisteAppl.Controllers
                     return StatusCode(StatusCodes.Status204NoContent, sifra);
                 }
 
-                try
-                {
+                var entitet = dto.MapSkladistarInsertUpdateFromDTO(entitetIzBaze);
 
+                _context.Skladistari.Update(entitet); // Promijenjen entitetIzBaze u entitet
+                _context.SaveChanges();
 
-                    var entitetIzBaze = _context.Skladistari.Find(sifra);
-
-                    if (entitetIzBaze == null)
-                    {
-                        return StatusCode(StatusCodes.Status204NoContent, sifra);
-                    }
-
-                    var entitet = dto.MapSkladistarInsertUpdateFromDTO(entitetIzBaze);
-
-                    _context.Skladistari.Update(entitetIzBaze);
-                    _context.SaveChanges();
-
-                    return StatusCode(StatusCodes.Status200OK, entitetIzBaze.MapSkladistarInsertUpdatedToDTO());
+                return StatusCode(StatusCodes.Status200OK, entitet.MapSkladistarInsertUpdatedToDTO()); // Promijenjen entitetIzBaze u entitet
             }
             catch (Exception ex)
             {
-                    return StatusCode(StatusCodes.Status503ServiceUnavailable,
-                        ex.Message);
+                return StatusCode(StatusCodes.Status503ServiceUnavailable,
+                    ex.Message);
             }
-
-
-            
-
         }
 
         /// <summary>

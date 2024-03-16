@@ -4,9 +4,9 @@ using AutoMapper;
 
 namespace SKladisteAppl.Extensions
 {
-    public class MappingIzdatnica
+    public static class MappingIzdatnica
     {
-        
+
 
         public static List<IzdatnicaDTORead> MapIzdatnicaReadList(this List<Izdatnica> lista)
         {
@@ -34,15 +34,13 @@ namespace SKladisteAppl.Extensions
 
         public static Izdatnica MapIzdatnicaInsertUpdateFromDTO(this IzdatnicaDTOInsertUpdate dto, Izdatnica entitet)
         {
-            entitet.BrojIzdatnice = dto.brojIzdatnice;
+            entitet.BrojIzdatnice = dto.brojizdatnice;
             entitet.Datum = dto.datum;
             entitet.Napomena = dto.napomena;
-            
+
             return entitet;
         }
     }
 
-    public class IzdatnicaDTOInsertUpdate
-    {
-    }
+
 }
