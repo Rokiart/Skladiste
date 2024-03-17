@@ -19,6 +19,11 @@ import Skladistari from './Pages/Skladistari/Skladistari'
 import SkladistariDodaj from './Pages/Skladistari/SkladistariDodaj'
 import SkladistariPromjeni from './Pages/Skladistari/SkladistariPromjeni'
 
+
+import Izdatnice from './Pages/izdatince/Izdatnice'
+import IzdatniceDodaj from './Pages/izdatince/IzdatniceDodaj'
+import IzdatnicePromjeni from './Pages/izdatince/IzdatnicePromjeni'
+
 function App() {
 
   

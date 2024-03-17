@@ -56,10 +56,11 @@ export default function Izdatnice() {
                   </tr>
                </thead>
                <tbody>
-                    {izdatnice && izdatnice.map((izdatnica,index)=>(
+                    {Izdatnice && Izdatnice.map((izdatnica,index)=>(
                         <tr key={index}>
                             <td>{entitet.brojIzdatnice}</td>
                             <td>{entitet.datum}</td>
+                            <td>{entitet.OsobaImePrezime}</td>
                             <td>{entitet.SkladistarImePrezime}</td>
                             <td>{entitet.napomena}</td>
                             <td className="sredina">

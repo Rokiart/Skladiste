@@ -50,7 +50,7 @@ function NavBar() {
           </Nav>
         </Navbar.Collapse>
         <Navbar.Collapse className="justify-content-end">
-        <Nav.Link target="_blank" href="https://romanzaric-001-site1.itempurl.com/api/v1">
+        <Nav.Link target="_blank" href="https://romanzaric-001-site1.itempurl.com/swagger/index.html">
           API dokumentacija</Nav.Link>
         </Navbar.Collapse>
       </Container>

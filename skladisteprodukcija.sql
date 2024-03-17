@@ -1,4 +1,17 @@
-﻿create table proizvodi(
+SELECT name, collation_name FROM sys.databases;
+GO
+-- Doma primjeniti na ime svoje baze 3 puta
+ALTER DATABASE db_aa599c_romanzaric SET SINGLE_USER WITH
+ROLLBACK IMMEDIATE;
+GO
+ALTER DATABASE db_aa599c_romanzaric COLLATE Croatian_CI_AS;
+GO
+ALTER DATABASE db_aa599c_romanzaric SET MULTI_USER;
+GO
+SELECT name, collation_name FROM sys.databases;
+GO
+
+create table proizvodi(
 
 sifra int not null primary key identity(1,1),
 naziv varchar(50) not null,
