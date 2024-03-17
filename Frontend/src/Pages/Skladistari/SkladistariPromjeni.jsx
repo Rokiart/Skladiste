@@ -19,7 +19,7 @@ export default function SkladistaraPromjeni(){
         .getBySifra(routeParams.sifra)
         .then((response) => {
           console.log(response);
-          setPolaznik(response.data);
+          setSkladistar(response.data);
         })
         .catch((err) => alert(err.poruka));
     }
@@ -29,7 +29,7 @@ export default function SkladistaraPromjeni(){
         dohvatiSkladistara();
     },[]);
 
-    async function promjeniSkladistara(skladistar){
+    async function promjeniSkladistar(skladistar){
         const odgovor = await SkladistarService.promjeni(routeParams.sifra,skladistar);
         if(odgovor.ok){
           navigate(RoutesNames.SKLADISTARI_PREGLED);
@@ -44,15 +44,17 @@ export default function SkladistaraPromjeni(){
         
 
         const podaci = new FormData(e.target);
-         promjeniSkladistar({
+        
+        const skladistar =
+        {
             ime: podaci.get('ime'),
-            prezime: parseInt(podaci.get('prezime')),
-            brojTelefona: parseFloat(podaci.get('broj telefona')),
-            email: parseFloat(podaci.get('email')),
+            prezime: skladistar.get('prezime'),
+            brojTelefona: podaci.get('broj telefona'),
+            email: podaci.get('email')
             
-        });
+        };
 
-          
+        promjeniSkladistar(skladistar) ; 
          
     }
 
@@ -67,7 +69,7 @@ export default function SkladistaraPromjeni(){
                     <Form.Label>Ime</Form.Label>
                     <Form.Control 
                         type="text"
-                        defaultValue={osoba.ime}
+                        defaultValue={skladistar.ime}
                         name="ime"
                     />
                 </Form.Group>
@@ -76,25 +78,25 @@ export default function SkladistaraPromjeni(){
                     <Form.Label>Prezime</Form.Label>
                     <Form.Control 
                         type="text"
-                        defaultValue={osoba.prezime}
+                        defaultValue={skladistar.prezime}
                         name="prezime"
                     />
                 </Form.Group>
 
                 <Form.Group controlId="brojTelefona">
-                    <Form.Label>Cijena</Form.Label>
+                    <Form.Label>Broj Telefona</Form.Label>
                     <Form.Control 
                         type="text"
-                        defaultValue={osoba.brojTelefona}
+                        defaultValue={skladistar.brojTelefona}
                         name="brojTelefona"
                     />
                 </Form.Group>
 
                 <Form.Group controlId="email">
-                    <Form.Label>Upisnina</Form.Label>
+                    <Form.Label>Email</Form.Label>
                     <Form.Control 
                         type="text"
-                        defaultValue={osoba.email}
+                        defaultValue={skladistar.email}
                         name="email"
                     />
                 </Form.Group>
@@ -109,6 +111,7 @@ export default function SkladistaraPromjeni(){
                     <Col>
                         <Button
                             variant="primary"
+                          
                             type="submit"
                         >
                             Promjeni skladistara

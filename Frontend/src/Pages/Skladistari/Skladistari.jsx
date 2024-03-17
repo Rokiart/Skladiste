@@ -15,7 +15,7 @@ export default function Skladistari() {
     const navigate = useNavigate();
 
     async function dohvatiSkladistare(){
-        await OsobaService.get()
+        await SkladistarService.get()
         .then((res)=>{
             setSkladistari(res.data);
         })
@@ -25,10 +25,10 @@ export default function Skladistari() {
     }
 
     useEffect(()=>{
-        dohvatiSkladistare;
+        dohvatiSkladistare();
     },[]);
 
-    async function ObrisiSkladistare(sifra){
+    async function ObrisiSkladistara(sifra){
         const odgovor = await SkladistarService.obrisi(sifra);
         if (odgovor.ok){
             
@@ -57,16 +57,16 @@ export default function Skladistari() {
                   </tr>
                </thead>
                <tbody>
-                    {osobe && osobe.map((osoba,index)=>(
+                    {Skladistari && Skladistari.map((skladistar,index)=>(
                         <tr key={index}>
-                            <td>{osoba.ime}</td>
-                            <td>{osoba.prezime}</td>
-                            <td>{osoba.brojTelefona}</td>
-                            <td>{osoba.email}</td>
+                            <td>{skladistar.ime}</td>
+                            <td>{skladistar.prezime}</td>
+                            <td>{skladistar.brojtelefona}</td>
+                            <td>{skladistar.email}</td>
                             <td className="sredina">
                                 <Button 
                                 variant="primary"
-                                onClick={()=>{navigate(`/osobe/${osoba.sifra}`)}}>
+                                onClick={()=>{navigate(`/skladistari/${skladistar.sifra}`)}}>
                                     <FaRegEdit
                                     size={25}
                                     />
@@ -75,7 +75,7 @@ export default function Skladistari() {
                                     &nbsp;&nbsp;&nbsp;
                                 <Button
                                     variant="danger"
-                                    onClick={()=>ObrisiSkladistara(osoba.sifra)}
+                                    onClick={()=>ObrisiSkladistara(skladistar.sifra)}
                                 >
                                     <FaRegTrashAlt 
                                     size={25}

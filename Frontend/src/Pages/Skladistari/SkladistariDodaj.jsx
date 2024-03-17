@@ -11,7 +11,7 @@ export default function SkladistareDodaj() {
     const navigate = useNavigate();
 
     async function dodajSkladistara(skladistar){
-        const odgovor = await OsobaService.dodaj(skladistar);
+        const odgovor = await SkladistarService.dodaj(skladistar);
         if(odgovor.ok){
           navigate(RoutesNames.SKLADISTARI_PREGLED);
         }else{
@@ -25,7 +25,7 @@ export default function SkladistareDodaj() {
         const podaci = new FormData(e.target);
        
 
-        dodajPredavac({
+        dodajSkladistara({
             ime: podaci.get('ime'),
             prezime: podaci.get('prezime'),
             brojTelefona: podaci.get('Broj Telefona'),
@@ -77,22 +77,22 @@ export default function SkladistareDodaj() {
         <Form.Group className='mb-3' controlId='email'>
           <Form.Label>Email</Form.Label>
           <Form.Control
-            type='email'
+            type='text'
             name='email'
             placeholder='Email'
             maxLength={100}
           />
         </Form.Group>
     
-        <Row>
+        <Row className="akcije">
           <Col>
-            <Link className='btn btn-danger gumb' to={RoutesNames.SKLADISTARI_PREGLED}>
+            <Link className='btn btn-danger' to={RoutesNames.SKLADISTARI_PREGLED}>
               Odustani
             </Link>
           </Col>
           <Col>
-            <Button variant='primary' className='gumb' type='submit'>
-              Dodaj Osobu
+            <Button variant='primary'  type='submit'>
+              Dodaj SKladištara
             </Button>
           </Col>
         </Row>

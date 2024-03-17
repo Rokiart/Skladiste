@@ -37,7 +37,7 @@ export default function OsobePromjeni(){
         }
     }
 
-    function handleSubmit(e){
+    async function handleSubmit(e){
         e.preventDefault();
         const podaci = new FormData(e.target);
 
@@ -45,13 +45,22 @@ export default function OsobePromjeni(){
         {
             ime: podaci.get('ime'),
             prezime: parseInt(podaci.get('prezime')),
-            brojTelefona: parseFloat(podaci.get('broj telefona')),
-            email: parseFloat(podaci.get('email')),
+            brojTelefona: parseFloat(podaci.get('brojTelefona')),
+            email: podaci.get('email')
             
           };
 
-          
-          promjeniOsobu(osoba);
+          try {
+            const odgovor = await OsobaService.promjeniOsobu(routeParams.sifra, novaOsoba);
+            if(odgovor.ok){
+                navigate(RoutesNames.OSOBE_PREGLED);
+            } else {
+                console.log(odgovor);
+                alert(odgovor.poruka);
+            }
+        } catch (error) {
+            alert(error);
+        }
     }
 
 

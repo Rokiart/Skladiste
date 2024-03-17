@@ -12,10 +12,11 @@ import { RoutesNames } from "../../constants";
 export default function Osobe() {
 
     const [osobe,setOsobe] = useState();
-    const navigate = useNavigate();
+    let navigate = useNavigate();
+    
 
     async function dohvatiOsobe(){
-        await OsobaService.getOsobe()
+        await OsobaService.get()
         .then((res)=>{
             setOsobe(res.data);
         })
@@ -25,14 +26,17 @@ export default function Osobe() {
     }
 
     useEffect(()=>{
-        dohvatiOsobe;
+        dohvatiOsobe();
     },[]);
 
     async function ObrisiOsobu(sifra){
-        const odgovor = await OsobaService.ObrisiOsobu(sifra);
+        const odgovor = await OsobaService.obrisi(sifra);
         if (odgovor.ok){
-            alert(odgovor.poruka.data.poruka);
+            
             dohvatiOsobe();
+        }
+        else {
+        alert(odgovor.poruka);
         }
         
     }
@@ -59,7 +63,7 @@ export default function Osobe() {
                         <tr key={index}>
                             <td>{osoba.ime}</td>
                             <td>{osoba.prezime}</td>
-                            <td>{osoba.brojTelefona}</td>
+                            <td>{osoba.brojtelefona}</td>
                             <td>{osoba.email}</td>
                             <td className="sredina">
                                 <Button 

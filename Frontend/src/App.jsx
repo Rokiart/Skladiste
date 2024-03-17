@@ -33,6 +33,7 @@ function App() {
      <Routes>
       <>
         <Route path={RoutesNames.HOME} element={<Pocetna/>} />
+        
         <Route path={RoutesNames.OSOBE_PREGLED} element={<Osobe/>} />
         <Route path={RoutesNames.OSOBE_NOVI} element={<OsobeDodaj/>} />
         <Route path={RoutesNames.OSOBE_PROMJENI} element={<OsobePromjeni/>} />

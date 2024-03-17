@@ -31,7 +31,7 @@ export default function OsobeDodaj() {
           setErrors({
               ime: form['ime'].validationMessage,
               prezime: form['prezime'].validationMessage,
-              brojTelefona: form['brojTelefona'].validationMessage,
+              brojTelefona: form['Broj Telefona'].validationMessage,
               email: form['email'].validationMessage
           });
           return;
@@ -43,7 +43,7 @@ export default function OsobeDodaj() {
         dodajOsobu({
           ime: podaci.get('ime'),
           prezime: podaci.get('prezime'),
-          brojTelefona: podaci.get('brojTelefona'),
+          brojTelefona: podaci.get('Broj Telefona'),
           email: podaci.get('email')
 
         });
@@ -88,7 +88,7 @@ export default function OsobeDodaj() {
         <Form.Group className='mb-3' controlId='email'>
           <Form.Label>Email</Form.Label>
           <Form.Control
-            type='email'
+            type='text'
             name='email'
             placeholder='Email'
             maxLength={100}

@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
 import { Button,Container, Table } from "react-bootstrap";
-import IzdatnicaService from "../../services/IzdatnicaService";
 import { ImManWoman } from "react-icons/im";
 import { FaRegEdit } from "react-icons/fa";
 import { FaRegTrashAlt } from "react-icons/fa";
 import { Link, useNavigate } from "react-router-dom";
+import IzdatnicaService from "../../services/IzdatnicaService";
 import { RoutesNames } from "../../constants";
+
 
 
 
@@ -15,9 +16,10 @@ export default function Izdatnice() {
     const navigate = useNavigate();
 
     async function dohvatiIzdatnice(){
-        await IzdatnicaService.getIzdatnice()
+        await IzdatnicaService.get()
         .then((res)=>{
-            setIzdatnice(res.data);
+
+          
         })
         .catch((e)=>{
             alert(e);
@@ -25,15 +27,20 @@ export default function Izdatnice() {
     }
 
     useEffect(()=>{
-        dohvatiIzdatnice;
+        dohvatiIzdatnice();
     },[]);
 
     async function ObrisiIzdatnicu(sifra){
-        const odgovor = await IzdatnicaService.ObrisiIzdatnicu(sifra);
+      
+        const odgovor = await IzdatnicaService.obrisi(sifra);
         if (odgovor.ok){
-            alert(odgovor.poruka.data.poruka);
+           
             dohvatiIzdatnice();
-        }
+        
+
+    } else {
+        alert(odgovor.poruka);
+    }
         
     }
 
@@ -49,8 +56,8 @@ export default function Izdatnice() {
                   <tr>
                      <th>BrojIzdatnice</th>
                      <th>Datum</th>
-                     <th>Osoba</th>
-                     <th>Skladistar</th>
+                     {/* <th>Osoba</th>
+                     <th>Skladistar</th> */}
                      <th>Napomena</th>
                      <th>Akcija</th>
                   </tr>
@@ -58,15 +65,15 @@ export default function Izdatnice() {
                <tbody>
                     {Izdatnice && Izdatnice.map((izdatnica,index)=>(
                         <tr key={index}>
-                            <td>{entitet.brojIzdatnice}</td>
-                            <td>{entitet.datum}</td>
-                            <td>{entitet.OsobaImePrezime}</td>
-                            <td>{entitet.SkladistarImePrezime}</td>
-                            <td>{entitet.napomena}</td>
+                            <td>{izdatnica.brojizdatnice}</td>
+                            <td>{izdatnica.datum}</td>
+                            {/* <td>{izdatnica.osoba}</td>
+                            <td>{izdatnica.skladistar}</td> */}
+                            <td>{izdatnica.napomena}</td>
                             <td className="sredina">
                                 <Button 
                                 variant="primary"
-                                onClick={()=>{navigate(`/izdatnica/${entitet.sifra}`)}}>
+                                onClick={()=>{navigate(`/izdatnica/${izdatnica.sifra}`)}}>
                                     <FaRegEdit
                                     size={25}
                                     />
@@ -75,7 +82,7 @@ export default function Izdatnice() {
                                     &nbsp;&nbsp;&nbsp;
                                 <Button
                                     variant="danger"
-                                    onClick={()=>ObrisiIzdatnicu(entitet.sifra)}
+                                    onClick={()=>ObrisiIzdatnicu(izdatnica.sifra)}
                                 >
                                     <FaRegTrashAlt 
                                     size={25}

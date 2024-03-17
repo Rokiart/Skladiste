@@ -6,30 +6,48 @@ import { RoutesNames } from '../../constants';
 
 export default function IzdatniceDodaj() {
   const navigate = useNavigate();
+  const [errors, setErrors] = useState({});
 
 
-  async function dodaj(e) {
+  async function dodajIzdatnice(e) {
     const odgovor = await Service.dodaj(e);
     if (odgovor.ok) {
       navigate(RoutesNames.IZDATNICE_PREGLED);
     } else {
-      alert(odgovor.poruka.errors);
+      setErrors(odgovor.poruka.errors || {});
     }
   }
 
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault();
 
     const podaci = new FormData(e.target);
 
+    const osobaSifra = podaci.get('osobaSifra');
+    const skladistarSifra = podaci.get('skladistarSifra');
 
-    dodajPolaznik({
-      brojIzdatnice: podaci.get('brojizdatnice'),
-      datump: podaci.get('datum'),
-      osobaSifra: 1, //nije gotovo
-      skladistarSifra: 1, //nije gotovo
-      napomena: podaci.get('napomena')
-    });
+    if (!osobaSifra || !skladistarSifra) {
+      alert('Odaberite osobu i skladistara!');
+      return;
+    }
+
+    // Poziv funkcija dodajOsoba i dodajSkladistar s pripadajućim podacima
+    const osobaOdgovor = await OsobaService.dodajOsoba({ sifra: osobaSifra });
+    const skladistarOdgovor = await SkladistarService.dodajSkladistar({ sifra: skladistarSifra });
+
+    if (osobaOdgovor.ok && skladistarOdgovor.ok) {
+      // Ako oba poziva budu uspješna, dodajIzdatnice se izvršava
+      dodajIzdatnice({
+        brojIzdatnice: podaci.get('brojizdatnice'),
+        datum: podaci.get('datum'),
+        osobaSifra: osobaSifra,
+        skladistarSifra: skladistarSifra,
+        napomena: podaci.get('napomena')
+      });
+    } else {
+      // Ako bilo koji od poziva ne uspije, korisnik će dobiti odgovarajuću poruku o grešci
+      alert('Greška prilikom dodavanja osobe ili skladistara!');
+    }
   }
 
   return (
@@ -39,7 +57,7 @@ export default function IzdatniceDodaj() {
           <Form.Label>Naziv</Form.Label>
           <Form.Control
             type='text'
-            name='brojIzdatnice'
+            name='brojizdatnice'
             placeholder='brojIzdatnice'
             maxLength={255}
             required
@@ -51,14 +69,33 @@ export default function IzdatniceDodaj() {
           <Form.Control
             type='date'
             name='datum'
+            required
+          />
+        </Form.Group>
+        
+        <Form.Group className='mb-3' controlId='osobaSifra'>
+          <Form.Label>Osoba</Form.Label>
+          <Form.Control
+            type='date'
+            name='osobaSifra'
+            required
           />
         </Form.Group>
 
-        <Form.Group className='mb-3' controlId='vrijeme'>
+        <Form.Group className='mb-3' controlId='skladistarSifra'>
+          <Form.Label>Skladistar</Form.Label>
+          <Form.Control
+            type='date'
+            name='skladistarSifra'
+            required
+          />
+        </Form.Group>
+
+        <Form.Group className='mb-3' controlId='napomena'>
           <Form.Label>Vrijeme</Form.Label>
           <Form.Control
-            type='time'
-            name='vrijeme'
+            type='text'
+            name='napomena'
           />
         </Form.Group>
 

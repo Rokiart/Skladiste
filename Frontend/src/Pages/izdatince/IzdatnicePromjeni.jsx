@@ -10,7 +10,7 @@ export default function IzdatnicePromjeni(){
 
     const navigate =useNavigate();
     const routeParams = useParams();
-    const [osoba,setIzdatnica] = useState({});
+    const [izdatnica,setIzdatnica] = useState({});
 
     async function dohvatiIzdatnicu(){
         await IzdatnicaService.getBySifra(routeParams.sifra)
@@ -41,19 +41,19 @@ export default function IzdatnicePromjeni(){
         e.preventDefault();
         const podaci = new FormData(e.target);
 
-        const osoba = 
+        const izdatnica = 
         {
             brojIzdatnice: podaci.get('brojIzdatnice'),
             datum: parseInt(podaci.get('datum')),
-            osoba: parseFloat(podaci.get('osoba')),
-            skladistar: parseFloat(podaci.get('skladistar')),
+            osoba: parseInt(podaci.get('osoba')),
+            skladistar: parseInt(podaci.get('skladistar')),
             napomena: parseFloat(podaci.get('napomena'))
             
             
           };
 
           
-          promjeniIzdatnicu(Izdatnica);
+          promjeniIzdatnicu(izdatnica);
     }
 
 
@@ -64,34 +64,34 @@ export default function IzdatnicePromjeni(){
            <Form onSubmit={handleSubmit}>
 
                 <Form.Group controlId="brojIzdatnice">
-                    <Form.Label>Ime</Form.Label>
+                    <Form.Label>Broj Izdatnice</Form.Label>
                     <Form.Control 
                         type="text"
-                        defaultValue={Izdatnica.brojIzdatnice}
+                        defaultValue={izdatnica.brojIzdatnice}
                         name="brojIzdatnice"
                     />
                 </Form.Group>
 
                 <Form.Group controlId="datum">
-                    <Form.Label>Prezime</Form.Label>
+                    <Form.Label>Datum</Form.Label>
                     <Form.Control 
                         type="text"
-                        defaultValue={Izdatnica.datum}
+                        defaultValue={izdatnica.datum}
                         name="datum"
                     />
                 </Form.Group>
 
                 <Form.Group controlId="osoba">
-                    <Form.Label>Cijena</Form.Label>
+                    <Form.Label>Osoba</Form.Label>
                     <Form.Control 
                         type="text"
-                        defaultValue={Izdatnica.osoba}
+                        defaultValue={izdatnica.osoba}
                         name="osoba"
                     />
                 </Form.Group>
 
                 <Form.Group controlId="skladistar">
-                    <Form.Label>Upisnina</Form.Label>
+                    <Form.Label>Skladistar</Form.Label>
                     <Form.Control 
                         type="text"
                         defaultValue={izdatnica.skladistar}
@@ -100,7 +100,7 @@ export default function IzdatnicePromjeni(){
                 </Form.Group>
 
                 <Form.Group controlId="napomena">
-                    <Form.Label>Upisnina</Form.Label>
+                    <Form.Label>Napomena</Form.Label>
                     <Form.Control 
                         type="text"
                         defaultValue={izdatnica.napomena}
