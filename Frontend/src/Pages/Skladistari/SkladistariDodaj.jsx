@@ -31,12 +31,7 @@ export default function SkladistareDodaj() {
             brojTelefona: podaci.get('Broj Telefona'),
             email: podaci.get('email')
             
-          });
-
-          
-           
-
-
+          });         
     }
 
     return(

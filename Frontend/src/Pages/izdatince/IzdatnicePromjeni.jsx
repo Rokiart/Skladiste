@@ -121,7 +121,7 @@ export default function IzdatnicePromjeni(){
                             variant="primary"
                             type="submit"
                         >
-                            Promjeni osobu
+                            Promjeni podatke izdatnice
                         </Button>
                     </Col>
                 </Row>

@@ -95,7 +95,7 @@ export default function ProizvodiPromjeni() {
           </Col>
           <Col>
             <Button variant='primary' className='gumb' type='submit'>
-              Promjeni predavača
+              Promjeni podatke proizvoda
             </Button>
           </Col>
         </Row>
