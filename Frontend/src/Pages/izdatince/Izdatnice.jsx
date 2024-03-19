@@ -18,6 +18,7 @@ export default function Izdatnice() {
     async function dohvatiIzdatnice(){
         await IzdatnicaService.get()
         .then((res)=>{
+            setIzdatnice(res.data);
 
           
         })
