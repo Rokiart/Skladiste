@@ -19,11 +19,12 @@ export default function OsobePromjeni(){
     async function dohvatiOsobu(){
         await OsobaService
         .getBySifra(routeParams.sifra)
-        .then((res)=>{
-            setOsoba(res.data);
+        .then((response)=>{
+            console.log(response);
+            setOsoba(response.data);
           })
-          .catch((e)=>{
-            alert(e.poruka);
+          .catch((err)=>{ alert(e.poruka);
+            
           });
     }
 
@@ -37,7 +38,7 @@ export default function OsobePromjeni(){
         if(odgovor.ok){
           navigate(RoutesNames.OSOBE_PREGLED);
         }else{
-          console.log(odgovor);
+          
           alert(odgovor.poruka);
         }
     }
@@ -46,15 +47,14 @@ export default function OsobePromjeni(){
         e.preventDefault();
         const podaci = new FormData(e.target);
             
-            const osoba ={
+            promjeniOsobu({
                 ime: podaci.get('ime'),
                 prezime: podaci.get('prezime'),
                 brojtelefona: podaci.get('brojtelefona'),
                 email: podaci.get('email')
-            };
-                
-           promjeniOsobu(osoba);    
-       
+            });
+              
+            
     }
 
 
@@ -90,7 +90,7 @@ export default function OsobePromjeni(){
                     <Form.Label>Broj Telefona</Form.Label>
                     <Form.Control 
                         type="text"
-                        defaultValue={osoba.brojTelefona}
+                        defaultValue={osoba.brojtelefona}
                         name="brojtelefona"
                         maxLength={50}
                     />
@@ -110,16 +110,16 @@ export default function OsobePromjeni(){
                 <Row >
                     <Col>
                         <Link 
-                        className="btn btn-danger"
+                        className="btn btn-danger gumb"
                         to={RoutesNames.OSOBE_PREGLED}>Odustani</Link>
                     </Col>
                     <Col>
                         <Button
                             variant="primary"
-                           
+                            className='gumb'
                             type="submit"
                         >
-                            Promjeni podatke osobe
+                            Promjeni podatke od osobe
                         </Button>
                     </Col>
                 </Row>
