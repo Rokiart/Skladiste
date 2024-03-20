@@ -4,9 +4,10 @@ import { ImManWoman } from "react-icons/im";
 import { FaRegEdit } from "react-icons/fa";
 import { FaRegTrashAlt } from "react-icons/fa";
 import { Link, useNavigate } from "react-router-dom";
+import moment from "moment";
+
 import IzdatnicaService from "../../services/IzdatnicaService";
 import { RoutesNames } from "../../constants";
-
 
 
 
@@ -18,7 +19,7 @@ export default function Izdatnice() {
     async function dohvatiIzdatnice(){
         await IzdatnicaService.get()
         .then((res)=>{
-            setIzdatnice(res.data);
+            setIzdatnice(Izdatnice);
 
           
         })
@@ -43,7 +44,16 @@ export default function Izdatnice() {
         alert(odgovor.poruka);
     }
         
+   }
+
+   function formatirajDatum(datum){
+    let mdp = moment.utc(datum);
+    if(mdp.hour()==0 && mdp.minutes()==0){
+        return mdp.format('DD. MM. YYYY.');
     }
+    return mdp.format('DD. MM. YYYY. HH:mm');
+    
+  }
 
     return(
         <Container>
@@ -57,8 +67,8 @@ export default function Izdatnice() {
                   <tr>
                      <th>BrojIzdatnice</th>
                      <th>Datum</th>
-                     {/* <th>Osoba</th>
-                     <th>Skladistar</th> */}
+                     <th>Osoba</th>
+                     <th>Skladistar</th> 
                      <th>Napomena</th>
                      <th>Akcija</th>
                   </tr>
@@ -66,10 +76,19 @@ export default function Izdatnice() {
                <tbody>
                     {Izdatnice && Izdatnice.map((izdatnica,index)=>(
                         <tr key={index}>
-                            <td>{izdatnica.brojizdatnice}</td>
-                            <td>{izdatnica.datum}</td>
-                            {/* <td>{izdatnica.osoba}</td>
-                            <td>{izdatnica.skladistar}</td> */}
+                            <td>{izdatnica.brojIzdatnice}</td>
+                            <td>  <p>
+                                {entitet.datum==null 
+                                ? 'Nije definirano'
+                                :   
+                                formatirajDatum(izdatnica.datum)
+                                }
+                                </p>
+                             
+                               
+                              </td>
+                            <td>{izdatnica.osobaImePrezime}</td>
+                            <td>{izdatnica.skladistarImePrezime}</td> 
                             <td>{izdatnica.napomena}</td>
                             <td className="sredina">
                                 <Button 

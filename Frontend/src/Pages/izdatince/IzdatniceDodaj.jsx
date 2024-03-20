@@ -1,20 +1,55 @@
 import { Button, Col, Container, Form, Row } from 'react-bootstrap';
 import { Link, useNavigate } from 'react-router-dom';
+import { useState } from 'react';
+
+
 import Service from '../../services/IzdatnicaService';
+import SkladistarService from '../../services/SkladistarService';
+import OsobaService from '../../services/OsobaService';
 import { RoutesNames } from '../../constants';
+
 
 
 export default function IzdatniceDodaj() {
   const navigate = useNavigate();
-  const [errors, setErrors] = useState({});
+  
 
+  const [osobe , setOsobe] =useState([]);
+  const [osobaSifra, setOsobaSifra] =useState(0);
+
+  const [skladistari, setSkladistari] = useState([]);
+  const [skladistarSifra, setSkladistarSifra] = useState(0);
+  
+  async function dohvatiOsobe(){
+    await OsobaService.getOsobe().
+      then((odgovor)=>{
+       setOsobe(odgovor.data);
+        setOsobaSifra(odgovor.data[0].sifra);
+      });
+  }
+  async function dohvatiSkladistare(){
+    await SkladistarService.get().
+      then((o)=>{
+        setSkladistari(o.data);
+        setSkladistarSifra(o.data[0].sifra);
+      });
+  }
+
+  async function ucitaj(){
+    await dohvatiOsobe();
+    await dohvatiSkladistare();
+  }
+
+  useEffect(()=>{
+    ucitaj();
+  },[]);
 
   async function dodajIzdatnice(e) {
-    const odgovor = await Service.dodaj(e);
+    const odgovor = await Service.dodajIzdatnice(e);
     if (odgovor.ok) {
       navigate(RoutesNames.IZDATNICE_PREGLED);
     } else {
-      setErrors(odgovor.poruka.errors || {});
+      alert(odgovor.poruka.errors);
     }
   }
 
@@ -23,38 +58,34 @@ export default function IzdatniceDodaj() {
 
     const podaci = new FormData(e.target);
 
-    const osobaSifra = podaci.get('osobaSifra');
-    const skladistarSifra = podaci.get('skladistarSifra');
+    
 
-    if (!osobaSifra || !skladistarSifra) {
-      alert('Odaberite osobu i skladistara!');
+    if(podaci.get('datum')=='' && podaci.get('vrijeme')!=''){
+      alert('Ako postavljate vrijeme morate i datum');
       return;
     }
+    let datum ='';
+    if(podaci.get('datum')!='' && podaci.get('vrijeme')==''){
+      datum = podaci.get('datum') + 'T00:00:00.000Z';
+    }else{
+      datum = podaci.get('datum') + 'T' + podaci.get('vrijeme') + ':00.000Z';
+    }
 
-    // Poziv funkcija dodajOsoba i dodajSkladistar s pripadajućim podacima
-    const osobaOdgovor = await OsobaService.dodajOsoba({ sifra: osobaSifra });
-    const skladistarOdgovor = await SkladistarService.dodajSkladistar({ sifra: skladistarSifra });
-
-    if (osobaOdgovor.ok && skladistarOdgovor.ok) {
-      // Ako oba poziva budu uspješna, dodajIzdatnice se izvršava
       dodajIzdatnice({
         brojIzdatnice: podaci.get('brojizdatnice'),
-        datum: podaci.get('datum'),
-        osobaSifra: osobaSifra,
-        skladistarSifra: skladistarSifra,
+        datum: datum,
+        osobaSifra: parseInt(osobaSifra),
+        skladistarSifra: parseInt(skladistarSifra),
         napomena: podaci.get('napomena')
       });
-    } else {
-      // Ako bilo koji od poziva ne uspije, korisnik će dobiti odgovarajuću poruku o grešci
-      alert('Greška prilikom dodavanja osobe ili skladistara!');
-    }
-  }
+    }   
+      
 
   return (
     <Container className='mt-4'>
       <Form onSubmit={handleSubmit}>
         <Form.Group className='mb-3' controlId='brojIzdatnice'>
-          <Form.Label>Naziv</Form.Label>
+          <Form.Label>Broj Izdatnice</Form.Label>
           <Form.Control
             type='text'
             name='brojizdatnice'
@@ -69,35 +100,44 @@ export default function IzdatniceDodaj() {
           <Form.Control
             type='date'
             name='datum'
-            required
-          />
-        </Form.Group>
-        
-        <Form.Group className='mb-3' controlId='osobaSifra'>
-          <Form.Label>Osoba</Form.Label>
-          <Form.Control
-            type='date'
-            name='osobaSifra'
-            required
           />
         </Form.Group>
 
-        <Form.Group className='mb-3' controlId='skladistarSifra'>
-          <Form.Label>Skladistar</Form.Label>
-          <Form.Control
-            type='date'
-            name='skladistarSifra'
-            required
-          />
-        </Form.Group>
-
-        <Form.Group className='mb-3' controlId='napomena'>
+        <Form.Group className='mb-3' controlId='vrijeme'>
           <Form.Label>Vrijeme</Form.Label>
           <Form.Control
-            type='text'
-            name='napomena'
+            type='time'
+            name='vrijeme'
           />
-        </Form.Group>
+         </Form.Group>
+
+         <Form.Group className='mb-3' controlId='osoba'>
+          <Form.Label>Osoba</Form.Label>
+            <Form.Select
+              onChange={(e)=>{setOsobaSifra(e.target.value)}}
+              >
+               {osobe && osobe.map((e,index)=>(
+                    <option key={index} value={e.sifra}>
+                   {e.ime} {e.prezime}
+                   </option>
+              ))}
+             </Form.Select>
+          </Form.Group>
+
+          <Form.Group className='mb-3' controlId='skladistar'>
+          <Form.Label>Skladištar</Form.Label>
+            <Form.Select
+              onChange={(e)=>{setSkladistarSifra(e.target.value)}}
+              >
+               {skladistari && skladistari.map((e,index)=>(
+                    <option key={index} value={e.sifra}>
+                   {e.ime} {e.prezime}
+                   </option>
+              ))}
+             </Form.Select>
+          </Form.Group>
+          
+       
 
        
 

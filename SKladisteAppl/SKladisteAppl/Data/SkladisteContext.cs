@@ -58,12 +58,12 @@ namespace SKladisteAppl.Data
 
             // implementacija veze n:n
             modelBuilder.Entity<Izdatnica>()
-                 .HasMany(i => i.Proizvodi)
+                .HasMany(i => i.Proizvodi)
                 .WithMany(i => i.Izdatnice)
-                .UsingEntity<Dictionary<string, object>>("clanovi",
+                .UsingEntity<Dictionary<string, object>>("izdatniceproizvodi",
                 c => c.HasOne<Proizvod>().WithMany().HasForeignKey("proizvod"),
                 c => c.HasOne<Izdatnica>().WithMany().HasForeignKey("izdatnica"),
-                c => c.ToTable("clanovi")
+                c => c.ToTable("izdatniceproizvodi")
                 );
 
 

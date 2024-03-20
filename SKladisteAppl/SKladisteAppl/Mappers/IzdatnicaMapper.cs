@@ -31,9 +31,10 @@ public class IzdatnicaMapper
                          entitet.Datum,
                          entitet.Osoba == null ? "" : (entitet.Osoba.Ime + " " + entitet.Osoba.Prezime).Trim(),
                          entitet.Skladistar == null ? "" : (entitet.Skladistar.Ime + " " + entitet.Skladistar.Prezime).Trim(),
-                         entitet.Proizvod,
-
+                        // entitet.Proizvod == null ? "" : (entitet.Proizvod.Naziv).Trim(),
                          entitet.Napomena));
+
+
             })
         );
     }
@@ -55,7 +56,7 @@ public class IzdatnicaMapper
                          entitet.Osoba == null ? null : entitet.Osoba.Sifra,
 
                          entitet.Skladistar == null ? null : entitet.Skladistar.Sifra,
-                        
+                        // entitet.Proizvod == null ? "" : (entitet.Proizvod.Sifra),
                          entitet.Napomena));
             })
         );

@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using SKladisteAppl.Models;
 using Microsoft.Data.SqlClient;
 using SKladisteAppl.Extensions;
+using Microsoft.EntityFrameworkCore;
 
 namespace SKladisteAppl.Controllers
 {
@@ -246,5 +247,32 @@ namespace SKladisteAppl.Controllers
             }
 
         }
+
+        [HttpGet]
+        [Route("trazi/{uvjet}")]
+        public IActionResult TraziPolaznik(string uvjet)
+        {
+            // ovdje će ići dohvaćanje u bazi
+
+            if (uvjet == null || uvjet.Length < 3)
+            {
+                return BadRequest(ModelState);
+            }
+
+            try
+            {
+                var proizvodi = _context.Proizvodi
+                    .Include(p => p.Izdatnice)
+                    .Where(p => p.Naziv.Contains(uvjet))
+                    .ToList();
+                return new JsonResult(proizvodi.MapProizvodReadList()); //200
+
+            }
+            catch (Exception e)
+            {
+                return StatusCode(StatusCodes.Status503ServiceUnavailable, e.Message); //204
+            }
+        }
+
     }
 }
