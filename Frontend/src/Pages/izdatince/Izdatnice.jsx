@@ -19,7 +19,7 @@ export default function Izdatnice() {
     async function dohvatiIzdatnice(){
         await IzdatnicaService.get()
         .then((res)=>{
-            setIzdatnice(Izdatnice);
+            setIzdatnice(res.data);
 
           
         })
@@ -27,9 +27,20 @@ export default function Izdatnice() {
             alert(e);
         });
     }
+    async function dohvatiProizvode() { // Dodano
+        await ProizvodService.get()
+          .then((res) => {
+            setProizvodi(res.data);
+          })
+          .catch((e) => {
+            alert(e);
+          });
+      }
 
     useEffect(()=>{
         dohvatiIzdatnice();
+        dohvatiProizvode();
+
     },[]);
 
     async function ObrisiIzdatnicu(sifra){
@@ -67,6 +78,7 @@ export default function Izdatnice() {
                   <tr>
                      <th>BrojIzdatnice</th>
                      <th>Datum</th>
+                     <th>Proizvod</th>
                      <th>Osoba</th>
                      <th>Skladistar</th> 
                      <th>Napomena</th>
@@ -78,7 +90,7 @@ export default function Izdatnice() {
                         <tr key={index}>
                             <td>{izdatnica.brojIzdatnice}</td>
                             <td>  <p>
-                                {entitet.datum==null 
+                                {izdatnica.datum==null 
                                 ? 'Nije definirano'
                                 :   
                                 formatirajDatum(izdatnica.datum)
@@ -87,6 +99,7 @@ export default function Izdatnice() {
                              
                                
                               </td>
+                              <td>{izdatnica.proizvodNaziv}</td>
                             <td>{izdatnica.osobaImePrezime}</td>
                             <td>{izdatnica.skladistarImePrezime}</td> 
                             <td>{izdatnica.napomena}</td>

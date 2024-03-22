@@ -56,7 +56,7 @@ namespace SKladisteAppl.Controllers
                 var lista = _context.Izdatnice
                   .Include(i => i.Osoba)
                   .Include(i => i.Skladistar)
-                  .Include(i => i.Proizvodi)
+                  .Include(i => i.Proizvod)
                   .ToList();
                 if (lista == null || lista.Count == 0)
                    
@@ -97,7 +97,7 @@ namespace SKladisteAppl.Controllers
             try
             {
                 var p = _context.Izdatnice.Include(i => i.Osoba).Include(i => i.Skladistar)
-                    .Include(i => i.Proizvodi).FirstOrDefault(x => x.Sifra == sifra);
+                    .Include(i => i.Proizvod).FirstOrDefault(x => x.Sifra == sifra);
                 if (p == null)
                 {
                     return new EmptyResult();
@@ -137,6 +137,13 @@ namespace SKladisteAppl.Controllers
                 return BadRequest();
             }
 
+            var proizvod = _context.Osobe.Find(dto.proizvodSifra);
+
+            if (proizvod == null)
+            {
+                return BadRequest();
+            }
+
             var skladistar = _context.Skladistari.Find(dto.skladistarSifra);
 
             if (skladistar == null)
@@ -144,9 +151,11 @@ namespace SKladisteAppl.Controllers
                 return BadRequest();
             }
 
+        
+
 
             var entitet = dto.MapIzdatnicaInsertUpdateFromDTO(new Izdatnica());
-            entitet.Proizvodi = new List<Proizvod>();
+            entitet.Proizvod = new List<Proizvod>();
             entitet.Osoba = osoba;
             entitet.Skladistar = skladistar;
 
@@ -191,7 +200,7 @@ namespace SKladisteAppl.Controllers
 
         [HttpPut]
         [Route("{sifra:int}")]
-        public IActionResult Put(int sifra, Models.IzdatnicaDTOInsertUpdate dto)
+        public IActionResult Put(int sifra, IzdatnicaDTOInsertUpdate dto)
         {
             if (sifra <= 0 || !ModelState.IsValid || dto == null)
             {
@@ -204,12 +213,21 @@ namespace SKladisteAppl.Controllers
 
 
                 var entitet = _context.Izdatnice.Include(i => i.Osoba).Include(i => i.Skladistar)
-                    .Include(i => i.Proizvodi).FirstOrDefault(x => x.Sifra == sifra);
+                    .Include(i => i.Proizvod).FirstOrDefault(x => x.Sifra == sifra);
 
                 if (entitet == null)
                 {
                     return StatusCode(StatusCodes.Status204NoContent, sifra);
                 }
+
+                var proizvod = _context.Proizvodi.Find(dto.proizvodSifra);
+
+                if (proizvod == null)
+                {
+                    return BadRequest();
+                }
+
+              
 
                 var osoba = _context.Osobe.Find(dto.osobasifra);
 
@@ -228,6 +246,8 @@ namespace SKladisteAppl.Controllers
 
                 entitet = dto.MapIzdatnicaInsertUpdateFromDTO(entitet);
 
+              
+                entitet.Proizvod = proizvod;
                 entitet.Osoba = osoba;
                 entitet.Skladistar = skladistar;
 
@@ -303,12 +323,12 @@ namespace SKladisteAppl.Controllers
             try
             {
                 var p = _context.Izdatnice
-                    .Include(i => i.Proizvodi).FirstOrDefault(x => x.Sifra == sifraIzdatnice);
+                    .Include(i => i.Proizvod).FirstOrDefault(x => x.Sifra == sifraIzdatnice);
                 if (p == null)
                 {
                     return new EmptyResult();
                 }
-                return new JsonResult(p.Proizvodi!.MapProizvodReadList());
+                return new JsonResult(p.Proizvod!.MapProizvodReadList());
             }
             catch (Exception ex)
             {
@@ -336,7 +356,7 @@ namespace SKladisteAppl.Controllers
             {
 
                 var izdatnica = _context.Izdatnice
-                    .Include(g => g.Proizvodi)
+                    .Include(g => g.Proizvod)
                     .FirstOrDefault(g => g.Sifra == sifra);
 
                 if (izdatnica == null)
@@ -351,7 +371,7 @@ namespace SKladisteAppl.Controllers
                     return BadRequest();
                 }
 
-                izdatnica.Proizvodi.Add(proizvod);
+                izdatnica.Proizvod.Add(proizvod);
 
                 _context.Izdatnice.Update(izdatnica);
                 _context.SaveChanges();
@@ -390,7 +410,7 @@ namespace SKladisteAppl.Controllers
             {
 
                 var izdatnica = _context.Izdatnice
-                    .Include(g => g.Proizvodi)
+                    .Include(g => g.Proizvod)
                     .FirstOrDefault(g => g.Sifra == sifra);
 
                 if (izdatnica == null)
@@ -406,7 +426,7 @@ namespace SKladisteAppl.Controllers
                 }
 
 
-                izdatnica.Proizvodi.Remove(proizvod);
+                izdatnica.Proizvod.Remove(proizvod);
 
                 _context.Izdatnice.Update(izdatnica);
                 _context.SaveChanges();

@@ -6,6 +6,7 @@ import { RoutesNames } from "../../constants";
 import IzdatnicaService from "../../services/IzdatnicaService";
 
 
+
 export default function IzdatnicePromjeni(){
 
     const navigate =useNavigate();
@@ -14,8 +15,8 @@ export default function IzdatnicePromjeni(){
 
     async function dohvatiIzdatnicu(){
         await IzdatnicaService.getBySifra(routeParams.sifra)
-        .then((res)=>{
-            setIzdatnica(res.data)
+        .then((response)=>{
+            setIzdatnica(response.data)
         })
         .catch((e)=>{
             alert(e.poruka);
@@ -32,7 +33,7 @@ export default function IzdatnicePromjeni(){
         if(odgovor.ok){
           navigate(RoutesNames.IZDATNICE_PREGLED);
         }else{
-          console.log(odgovor);
+          
           alert(odgovor.poruka);
         }
     }
@@ -41,13 +42,26 @@ export default function IzdatnicePromjeni(){
         e.preventDefault();
         const podaci = new FormData(e.target);
 
+        if(podaci.get('datum')=='' && podaci.get('vrijeme')!=''){
+            alert('Ako postavljate vrijeme morate i datum');
+            return;
+          }
+          let datum ='';
+          if(podaci.get('datum')!='' && podaci.get('vrijeme')==''){
+            datum = podaci.get('datum') + 'T00:00:00.000Z';
+          }else{
+            datum = podaci.get('datum') + 'T' + podaci.get('vrijeme') + ':00.000Z';
+          }
+      
+
         const izdatnica = 
         {
             brojIzdatnice: podaci.get('brojIzdatnice'),
-            datum: parseInt(podaci.get('datum')),
-            osoba: parseInt(podaci.get('osoba')),
-            skladistar: parseInt(podaci.get('skladistar')),
-            napomena: parseFloat(podaci.get('napomena'))
+            datum: datum,
+            proizvod: podaci.get('proizvod'),
+            osoba: podaci.get('osoba'),
+            skladistar: podaci.get('skladistar'),
+            napomena: podaci.get('napomena')
             
             
           };
@@ -59,47 +73,74 @@ export default function IzdatnicePromjeni(){
 
     return (
 
-        <Container>
+        <Container className='mt-4'>
            
            <Form onSubmit={handleSubmit}>
 
-                <Form.Group controlId="brojIzdatnice">
+                <Form.Group  className='mb-3' controlId="brojIzdatnice">
                     <Form.Label>Broj Izdatnice</Form.Label>
                     <Form.Control 
                         type="text"
                         defaultValue={izdatnica.brojIzdatnice}
                         name="brojIzdatnice"
+                        maxLength={255}
+                        required
                     />
                 </Form.Group>
 
-                <Form.Group controlId="datum">
+                <Form.Group className='mb-3' controlId="datum">
                     <Form.Label>Datum</Form.Label>
                     <Form.Control 
                         type="text"
                         defaultValue={izdatnica.datum}
                         name="datum"
+                        required
                     />
                 </Form.Group>
 
-                <Form.Group controlId="osoba">
+                <Form.Group className='mb-3' controlId='vrijeme'>
+                    <Form.Label>Vrijeme</Form.Label>
+                    <Form.Control
+                         type='time'
+                         name='vrijeme'
+                         
+                    />
+                </Form.Group>
+
+
+                <Form.Group className='mb-3' controlId="proizvod">
+                    <Form.Label>Proizvod</Form.Label>
+                    <Form.Control 
+                        type="text"
+                        defaultValue={izdatnica.proizvod}
+                        name="proizvod"
+                        required
+                    />
+                </Form.Group>
+
+                
+
+                <Form.Group className='mb-3' controlId="osoba">
                     <Form.Label>Osoba</Form.Label>
                     <Form.Control 
                         type="text"
                         defaultValue={izdatnica.osoba}
                         name="osoba"
+                        required
                     />
                 </Form.Group>
 
-                <Form.Group controlId="skladistar">
+                <Form.Group className='mb-3' controlId="skladistar">
                     <Form.Label>Skladistar</Form.Label>
                     <Form.Control 
                         type="text"
                         defaultValue={izdatnica.skladistar}
                         name="skladistar"
+                        required
                     />
                 </Form.Group>
 
-                <Form.Group controlId="napomena">
+                <Form.Group className='mb-3' controlId="napomena">
                     <Form.Label>Napomena</Form.Label>
                     <Form.Control 
                         type="text"

@@ -58,7 +58,7 @@ namespace SKladisteAppl.Data
 
             // implementacija veze n:n
             modelBuilder.Entity<Izdatnica>()
-                .HasMany(i => i.Proizvodi)
+                .HasMany(i => i.Proizvod)
                 .WithMany(i => i.Izdatnice)
                 .UsingEntity<Dictionary<string, object>>("izdatniceproizvodi",
                 c => c.HasOne<Proizvod>().WithMany().HasForeignKey("proizvod"),

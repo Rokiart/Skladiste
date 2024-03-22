@@ -81,12 +81,12 @@ export default function SkladistareDodaj() {
     
         <Row className="akcije">
           <Col>
-            <Link className='btn btn-danger' to={RoutesNames.SKLADISTARI_PREGLED}>
+            <Link className='btn btn-danger gumb' to={RoutesNames.SKLADISTARI_PREGLED}>
               Odustani
             </Link>
           </Col>
           <Col>
-            <Button variant='primary'  type='submit'>
+            <Button variant='primary' className='gumb' type='submit'>
               Dodaj SKladištara
             </Button>
           </Col>

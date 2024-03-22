@@ -1,11 +1,12 @@
 import { Button, Col, Container, Form, Row } from 'react-bootstrap';
 import { Link, useNavigate } from 'react-router-dom';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 
 import Service from '../../services/IzdatnicaService';
 import SkladistarService from '../../services/SkladistarService';
 import OsobaService from '../../services/OsobaService';
+import ProizvodService from '../../services/ProizvodService';
 import { RoutesNames } from '../../constants';
 
 
@@ -19,9 +20,12 @@ export default function IzdatniceDodaj() {
 
   const [skladistari, setSkladistari] = useState([]);
   const [skladistarSifra, setSkladistarSifra] = useState(0);
+
+  const [proizvodi , setProizvodi] =useState([]);
+  const [proizvodSifra, setProizvodSifra] =useState(0);
   
   async function dohvatiOsobe(){
-    await OsobaService.getOsobe().
+    await OsobaService.get().
       then((odgovor)=>{
        setOsobe(odgovor.data);
         setOsobaSifra(odgovor.data[0].sifra);
@@ -34,10 +38,18 @@ export default function IzdatniceDodaj() {
         setSkladistarSifra(o.data[0].sifra);
       });
   }
+  async function dohvatiProizvode(){
+    await ProizvodService.get().
+      then((o)=>{
+        setProizvodi(o.data);
+        setProizvodSifra(o.data[0].sifra);
+      });
+  }
 
   async function ucitaj(){
     await dohvatiOsobe();
     await dohvatiSkladistare();
+    await dohvatiProizvode();
   }
 
   useEffect(()=>{
@@ -45,7 +57,7 @@ export default function IzdatniceDodaj() {
   },[]);
 
   async function dodajIzdatnice(e) {
-    const odgovor = await Service.dodajIzdatnice(e);
+    const odgovor = await Service.dodaj(e);
     if (odgovor.ok) {
       navigate(RoutesNames.IZDATNICE_PREGLED);
     } else {
@@ -74,6 +86,7 @@ export default function IzdatniceDodaj() {
       dodajIzdatnice({
         brojIzdatnice: podaci.get('brojizdatnice'),
         datum: datum,
+        proizvodSifra: parseInt(proizvodSifra),
         osobaSifra: parseInt(osobaSifra),
         skladistarSifra: parseInt(skladistarSifra),
         napomena: podaci.get('napomena')
@@ -111,6 +124,19 @@ export default function IzdatniceDodaj() {
           />
          </Form.Group>
 
+         <Form.Group className='mb-3' controlId='proizvod'>
+          <Form.Label>Proizvod</Form.Label>
+            <Form.Select
+              onChange={(e)=>{setProizvodSifra(e.target.value)}}
+              >
+               {proizvodi && proizvodi.map((e,index)=>(
+                    <option key={index} value={e.sifra}>
+                   {e.ime} {e.prezime}
+                   </option>
+              ))}
+             </Form.Select>
+          </Form.Group>
+
          <Form.Group className='mb-3' controlId='osoba'>
           <Form.Label>Osoba</Form.Label>
             <Form.Select
@@ -136,10 +162,18 @@ export default function IzdatniceDodaj() {
               ))}
              </Form.Select>
           </Form.Group>
-          
-       
 
-       
+          <Form.Group className='mb-3' controlId='napomena'>
+          <Form.Label>Napomena</Form.Label>
+          <Form.Control
+            type='text'
+            name='napomena'
+            placeholder='napomena'
+            maxLength={600}
+          
+            />
+            </Form.Group> 
+                
 
         <Row>
           <Col>
@@ -149,7 +183,7 @@ export default function IzdatniceDodaj() {
           </Col>
           <Col>
             <Button variant='primary' className='gumb' type='submit'>
-              Dodaj Polaznika
+              Dodaj novu izdatnicu
             </Button>
           </Col>
         </Row>

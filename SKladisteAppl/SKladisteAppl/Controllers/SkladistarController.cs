@@ -245,5 +245,31 @@ namespace SKladisteAppl.Controllers
 
         }
 
+        [HttpPatch]
+        public async Task<ActionResult> Patch(int sifraSkladistar, IFormFile datoteka)
+        {
+            if (datoteka == null)
+            {
+                return BadRequest();
+            }
+            try
+            {
+                var ds = Path.DirectorySeparatorChar;
+                string dir = Path.Combine(Directory.GetCurrentDirectory()
+                    + ds + "wwwroot" + ds + "datoteke" + ds + "skladistar");
+                if (!System.IO.Directory.Exists(dir))
+                {
+                    System.IO.Directory.CreateDirectory(dir);
+                }
+                var putanja = Path.Combine(dir + ds + sifraSkladistar + "_" + System.IO.Path.GetExtension(datoteka.FileName));
+                Stream fileStream = new FileStream(putanja, FileMode.Create);
+                await datoteka.CopyToAsync(fileStream);
+                return new JsonResult(new { poruka = "Datoteka pohranjena" });
+            }
+            catch (Exception e)
+            {
+                return StatusCode(StatusCodes.Status503ServiceUnavailable, e.Message);
+            }
+        }
     }
 }

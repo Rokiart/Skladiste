@@ -36,6 +36,7 @@ namespace SKladisteAppl.Extensions
         {
             entitet.BrojIzdatnice = dto.brojizdatnice;
             entitet.Datum = dto.datum;
+            entitet.Proizvod= dto.proizvodNaziv;
             entitet.Napomena = dto.napomena;
 
             return entitet;

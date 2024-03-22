@@ -1,4 +1,5 @@
-﻿namespace SKladisteAppl.Models
+﻿
+namespace SKladisteAppl.Models
 {
     /// <summary>
     /// Predstavlja proizvod u sustavu skladišta.
@@ -24,5 +25,10 @@
         /// Izdatnice koje sadrže ovaj proizvod.
         /// </summary>
         public ICollection<Izdatnica>? Izdatnice { get; set; } = new List<Izdatnica>();
+
+        public static implicit operator List<object>(Proizvod v)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

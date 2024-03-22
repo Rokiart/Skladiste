@@ -39,7 +39,7 @@ namespace SKladisteAppl.Models
         /// <summary>
         /// Lista proizvoda koji su vezani uz izdatnicu.
         /// </summary>
-        public List<Proizvod>? Proizvodi { get; set; }
+        public List<Proizvod>? Proizvod { get; set; }
        
     }
 }

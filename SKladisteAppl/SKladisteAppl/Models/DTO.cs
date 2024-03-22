@@ -45,14 +45,13 @@ namespace SKladisteAppl.Models
     /// Predstavlja podatke o izdatnici za čitanje.
     /// </summary>
     public record IzdatnicaDTORead(int sifra, string? brojIzdatnice,
-        DateTime? datum, string? osobaImePrezime, string? skladistarImePrezime,
-         string napomena);
+        DateTime? datum,string? proizvodNaziv, string? osobaImePrezime, string? skladistarImePrezime, string? napomena);
 
     /// <summary>
     /// Predstavlja podatke o izdatnici za unos i ažuriranje.
     /// </summary>
     public record IzdatnicaDTOInsertUpdate(string? brojizdatnice,
-        DateTime? datum, int? osobasifra, int? skladistarSifra, string napomena);
+        DateTime? datum,int? proizvodSifra, int? osobasifra, int? skladistarSifra,  string napomena);
     
 }
 
