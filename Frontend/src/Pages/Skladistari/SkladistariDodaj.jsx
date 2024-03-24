@@ -43,7 +43,7 @@ export default function SkladistareDodaj() {
             type='text'
             name='ime'
             placeholder='Ime'
-            maxLength={255}
+            maxLength={50}
             required
           />
         </Form.Group>
@@ -54,8 +54,7 @@ export default function SkladistareDodaj() {
             type='text'
             name='prezime'
             placeholder='Prezime'
-            maxLength={255}
-            required
+            maxLength={50}
           />
         </Form.Group>
 
@@ -75,7 +74,7 @@ export default function SkladistareDodaj() {
             type='text'
             name='email'
             placeholder='Email'
-            maxLength={100}
+            maxLength={50}
           />
         </Form.Group>
     

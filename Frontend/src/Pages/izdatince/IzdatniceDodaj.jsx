@@ -56,7 +56,7 @@ export default function IzdatniceDodaj() {
     ucitaj();
   },[]);
 
-  async function dodajIzdatnice(e) {
+  async function dodaj(e) {
     const odgovor = await Service.dodaj(e);
     if (odgovor.ok) {
       navigate(RoutesNames.IZDATNICE_PREGLED);
@@ -103,7 +103,7 @@ export default function IzdatniceDodaj() {
             type='text'
             name='brojizdatnice'
             placeholder='brojIzdatnice'
-            maxLength={255}
+            maxLength={50}
             required
           />
         </Form.Group>
@@ -169,7 +169,7 @@ export default function IzdatniceDodaj() {
             type='text'
             name='napomena'
             placeholder='napomena'
-            maxLength={600}
+            maxLength={250}
           
             />
             </Form.Group> 

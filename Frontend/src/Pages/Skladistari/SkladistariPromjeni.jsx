@@ -93,16 +93,17 @@ export default function SkladistaraPromjeni(){
                     />
                 </Form.Group>
 
-                <Form.Group controlId="email">
+                <Form.Group controlId='email'>
                     <Form.Label>Email</Form.Label>
-                    <Form.Control 
-                        type="text"
+                    <Form.Control
+                        type='text'
+                        name='email'
                         defaultValue={skladistar.email}
-                        name="email"
-                        maxLength={20}
+                        maxLength={50}
                     />
-                </Form.Group>
 
+                 </Form.Group>
+        
                 
                 <Row >
                     <Col>

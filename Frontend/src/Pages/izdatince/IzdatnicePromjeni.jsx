@@ -83,7 +83,7 @@ export default function IzdatnicePromjeni(){
                         type="text"
                         defaultValue={izdatnica.brojIzdatnice}
                         name="brojIzdatnice"
-                        maxLength={255}
+                        maxLength={50}
                         required
                     />
                 </Form.Group>
@@ -94,7 +94,7 @@ export default function IzdatnicePromjeni(){
                         type="text"
                         defaultValue={izdatnica.datum}
                         name="datum"
-                        required
+                        
                     />
                 </Form.Group>
 
@@ -146,6 +146,7 @@ export default function IzdatnicePromjeni(){
                         type="text"
                         defaultValue={izdatnica.napomena}
                         name="napomena"
+                        maxLength={250}
                     />
 
                 </Form.Group>                     
