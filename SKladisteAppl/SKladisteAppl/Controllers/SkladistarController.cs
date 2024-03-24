@@ -245,6 +245,13 @@ namespace SKladisteAppl.Controllers
 
         }
 
+        /// <summary>
+        /// Dodavanje dazoteke
+        /// </summary>
+        /// <param name="sifraSkladistar"></param>
+        /// <param name="datoteka"></param>
+        /// <returns></returns>
+
         [HttpPatch]
         public async Task<ActionResult> Patch(int sifraSkladistar, IFormFile datoteka)
         {
@@ -256,7 +263,7 @@ namespace SKladisteAppl.Controllers
             {
                 var ds = Path.DirectorySeparatorChar;
                 string dir = Path.Combine(Directory.GetCurrentDirectory()
-                    + ds + "wwwroot" + ds + "datoteke" + ds + "skladistar");
+                    + ds + "wwwroot" + ds + "datoteke" + ds + "skladistari");
                 if (!System.IO.Directory.Exists(dir))
                 {
                     System.IO.Directory.CreateDirectory(dir);
@@ -271,5 +278,6 @@ namespace SKladisteAppl.Controllers
                 return StatusCode(StatusCodes.Status503ServiceUnavailable, e.Message);
             }
         }
+
     }
 }

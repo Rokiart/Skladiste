@@ -30,7 +30,6 @@ namespace SKladisteAppl.Extensions
             var mapper = ProizvodMapper.InicijalizirajInsertUpdateToDTO();
             return mapper.Map<ProizvodDTOInsertUpdate>(entitet);
         }
-       
 
         public static Proizvod MapProizvodInsertUpdateFromDTO(this ProizvodDTOInsertUpdate dto, Proizvod entitet)
         {

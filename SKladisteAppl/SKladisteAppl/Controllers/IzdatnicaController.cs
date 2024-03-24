@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 
 using Microsoft.EntityFrameworkCore;
 using SKladisteAppl.Extensions;
-
+using IzdatnicaDTOInsertUpdate = SKladisteAppl.Models.IzdatnicaDTOInsertUpdate;
 
 
 
@@ -56,7 +56,7 @@ namespace SKladisteAppl.Controllers
                 var lista = _context.Izdatnice
                   .Include(i => i.Osoba)
                   .Include(i => i.Skladistar)
-                  .Include(i => i.Proizvod)
+                  .Include(i => i.Proizvodi)
                   .ToList();
                 if (lista == null || lista.Count == 0)
                    
@@ -97,7 +97,7 @@ namespace SKladisteAppl.Controllers
             try
             {
                 var p = _context.Izdatnice.Include(i => i.Osoba).Include(i => i.Skladistar)
-                    .Include(i => i.Proizvod).FirstOrDefault(x => x.Sifra == sifra);
+                    .Include(i => i.Proizvodi).FirstOrDefault(x => x.Sifra == sifra);
                 if (p == null)
                 {
                     return new EmptyResult();
@@ -137,13 +137,6 @@ namespace SKladisteAppl.Controllers
                 return BadRequest();
             }
 
-            var proizvod = _context.Osobe.Find(dto.proizvodSifra);
-
-            if (proizvod == null)
-            {
-                return BadRequest();
-            }
-
             var skladistar = _context.Skladistari.Find(dto.skladistarSifra);
 
             if (skladistar == null)
@@ -151,11 +144,9 @@ namespace SKladisteAppl.Controllers
                 return BadRequest();
             }
 
-        
-
 
             var entitet = dto.MapIzdatnicaInsertUpdateFromDTO(new Izdatnica());
-            entitet.Proizvodi = new List<Proizvod>();
+
             entitet.Osoba = osoba;
             entitet.Skladistar = skladistar;
 
@@ -200,7 +191,7 @@ namespace SKladisteAppl.Controllers
 
         [HttpPut]
         [Route("{sifra:int}")]
-        public IActionResult Put(int sifra, IzdatnicaDTOInsertUpdate dto)
+        public IActionResult Put(int sifra, Models.IzdatnicaDTOInsertUpdate dto)
         {
             if (sifra <= 0 || !ModelState.IsValid || dto == null)
             {
@@ -220,15 +211,6 @@ namespace SKladisteAppl.Controllers
                     return StatusCode(StatusCodes.Status204NoContent, sifra);
                 }
 
-                var proizvod = _context.Proizvodi.Find(dto.proizvodSifra);
-
-                if (proizvod == null)
-                {
-                    return BadRequest();
-                }
-
-              
-
                 var osoba = _context.Osobe.Find(dto.osobasifra);
 
                 if (osoba == null)
@@ -246,8 +228,6 @@ namespace SKladisteAppl.Controllers
 
                 entitet = dto.MapIzdatnicaInsertUpdateFromDTO(entitet);
 
-              
-                entitet.Proizvodi = proizvod;
                 entitet.Osoba = osoba;
                 entitet.Skladistar = skladistar;
 
@@ -337,6 +317,7 @@ namespace SKladisteAppl.Controllers
             }
         }
 
+       
 
         [HttpPost]
         [Route("{sifra:int}/dodaj/{proizvodSifra:int}")]
@@ -393,7 +374,7 @@ namespace SKladisteAppl.Controllers
 
         [HttpDelete]
         [Route("{sifra:int}/obrisi/{proizvodSifra:int}")]
-        public IActionResult ObrisiProizvod(int sifra, int proizvodSifra)
+        public IActionResult ObrisiIzdatnicu(int sifra, int proizvodSifra)
         {
 
             if (!ModelState.IsValid)
@@ -441,6 +422,7 @@ namespace SKladisteAppl.Controllers
                        ex.Message);
 
             }
+
 
         }
     }

@@ -1,5 +1,4 @@
 ﻿using AutoMapper;
-using SKladisteAppl.Extensions;
 using SKladisteAppl.Models;
 
 namespace SKladisteAppl.Mappers;
@@ -30,13 +29,9 @@ public class IzdatnicaMapper
                          entitet.Sifra,
                          entitet.BrojIzdatnice,
                          entitet.Datum,
-                         entitet.Proizvod == null ? "" : (entitet.Proizvod.Naziv).Trim(),
                          entitet.Osoba == null ? "" : (entitet.Osoba.Ime + " " + entitet.Osoba.Prezime).Trim(),
                          entitet.Skladistar == null ? "" : (entitet.Skladistar.Ime + " " + entitet.Skladistar.Prezime).Trim(),
-                        // entitet.Proizvod == null ? "" : (entitet.Proizvod.Naziv).Trim(),
                          entitet.Napomena));
-
-
             })
         );
     }
@@ -55,11 +50,10 @@ public class IzdatnicaMapper
                      new IzdatnicaDTOInsertUpdate(
                          entitet.BrojIzdatnice,
                          entitet.Datum,
-                         entitet.Proizvod == null ? null : entitet.Proizvod.Sifra,
                          entitet.Osoba == null ? null : entitet.Osoba.Sifra,
 
                          entitet.Skladistar == null ? null : entitet.Skladistar.Sifra,
-                       
+                        
                          entitet.Napomena));
             })
         );
