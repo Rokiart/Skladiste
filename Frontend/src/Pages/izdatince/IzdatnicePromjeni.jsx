@@ -28,12 +28,12 @@ export default function IzdatnicePromjeni(){
         dohvatiIzdatnicu();
     },[]);
 
-    async function promjeniIzdatnicu(Izdatnica){
-        const odgovor = await IzdatnicaService.promjeniIzdatnicu(routeParams.sifra,Izdatnica);
+    async function promjeniIzdatnicu(izdatnica){
+        const odgovor = await IzdatnicaService.promjeniIzdatnicu(routeParams.sifra,izdatnica);
         if(odgovor.ok){
           navigate(RoutesNames.IZDATNICE_PREGLED);
         }else{
-          
+          console.log(odgovor);
           alert(odgovor.poruka);
         }
     }
@@ -58,7 +58,7 @@ export default function IzdatnicePromjeni(){
         {
             brojIzdatnice: podaci.get('brojIzdatnice'),
             datum: datum,
-            proizvod: podaci.get('proizvod'),
+            // proizvod: podaci.get('proizvod'),
             osoba: podaci.get('osoba'),
             skladistar: podaci.get('skladistar'),
             napomena: podaci.get('napomena')
@@ -84,7 +84,7 @@ export default function IzdatnicePromjeni(){
                         defaultValue={izdatnica.brojIzdatnice}
                         name="brojIzdatnice"
                         maxLength={50}
-                        required
+                       
                     />
                 </Form.Group>
 
@@ -108,7 +108,7 @@ export default function IzdatnicePromjeni(){
                 </Form.Group>
 
 
-                <Form.Group className='mb-3' controlId="proizvod">
+                {/* <Form.Group className='mb-3' controlId="proizvod">
                     <Form.Label>Proizvod</Form.Label>
                     <Form.Control 
                         type="text"
@@ -116,7 +116,7 @@ export default function IzdatnicePromjeni(){
                         name="proizvod"
                         required
                     />
-                </Form.Group>
+                </Form.Group> */}
 
                 
 
@@ -126,7 +126,7 @@ export default function IzdatnicePromjeni(){
                         type="text"
                         defaultValue={izdatnica.osoba}
                         name="osoba"
-                        required
+                        
                     />
                 </Form.Group>
 
@@ -136,7 +136,7 @@ export default function IzdatnicePromjeni(){
                         type="text"
                         defaultValue={izdatnica.skladistar}
                         name="skladistar"
-                        required
+                       
                     />
                 </Form.Group>
 

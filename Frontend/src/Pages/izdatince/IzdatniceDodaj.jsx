@@ -83,7 +83,7 @@ export default function IzdatniceDodaj() {
       datum = podaci.get('datum') + 'T' + podaci.get('vrijeme') + ':00.000Z';
     }
 
-      dodajIzdatnice({
+      dodaj({
         brojIzdatnice: podaci.get('brojizdatnice'),
         datum: datum,
         proizvodSifra: parseInt(proizvodSifra),
@@ -131,7 +131,7 @@ export default function IzdatniceDodaj() {
               >
                {proizvodi && proizvodi.map((e,index)=>(
                     <option key={index} value={e.sifra}>
-                   {e.ime} {e.prezime}
+                   {e.naziv} 
                    </option>
               ))}
              </Form.Select>

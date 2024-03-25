@@ -7,6 +7,7 @@ import { Link, useNavigate } from "react-router-dom";
 import moment from "moment";
 
 import IzdatnicaService from "../../services/IzdatnicaService";
+
 import { RoutesNames } from "../../constants";
 
 
@@ -27,19 +28,11 @@ export default function Izdatnice() {
             alert(e);
         });
     }
-    async function dohvatiProizvode() { // Dodano
-        await ProizvodService.get()
-          .then((res) => {
-            setProizvodi(res.data);
-          })
-          .catch((e) => {
-            alert(e);
-          });
-      }
+   
 
     useEffect(()=>{
         dohvatiIzdatnice();
-        dohvatiProizvode();
+    
 
     },[]);
 

@@ -20,5 +20,5 @@ export const RoutesNames = {
 };
 
 export const App = {
-    DEV: false
+    DEV: true
 };
