@@ -24,35 +24,115 @@ export default function IzdatnicePromjeni(){
     const [Osobe, setOsobe] = useState([]);
     const [sifraOsoba, setSifraOsoba] = useState(0);
 
-    const [smjerovi, setSmjerovi] = useState([]);
-  const [sifraSmjer, setSifraSmjer] = useState(0);
+    const [skladistari, setSkladistari] = useState([]);
+    const [sifraSkladistar, setSifraSkladistar] = useState(0);
+
+    const [proizvodi, setProizvodi] = useState([]);
+    const [sifraProizvod, setSifraProizvod] = useState(0);
+
+    const [searchName, setSearchName] = useState('');
+
+    const typeaheadRef = useRef(null);
 
 
-
-    async function dohvatiIzdatnicu(){
-        await IzdatnicaService.getBySifra(routeParams.sifra)
-        .then((response)=>{
-            setIzdatnica(response.data)
-        })
-        .catch((e)=>{
-            alert(e.poruka);
-        });
-    }
-
-    useEffect(()=>{
-        
-        dohvatiIzdatnicu();
-    },[]);
-
-    async function promjeniIzdatnicu(izdatnica){
-        const odgovor = await IzdatnicaService.promjeniIzdatnicu(routeParams.sifra,izdatnica);
-        if(odgovor.ok){
-          navigate(RoutesNames.IZDATNICE_PREGLED);
-        }else{
-          console.log(odgovor);
-          alert(odgovor.poruka);
+    async function dohvatiIzdatnica() {
+        const odgovor = await Service.getBySifra(routeParams.sifra);
+        if(!odgovor.ok){
+          alert(dohvatiPorukeAlert(odgovor.podaci));
+          return;
         }
-    }
+
+    async function dohvatiProizvodi() {
+        const odgovor = await Service.getProizvodi(routeParams.sifra);
+        if(!odgovor.ok){
+            alert(dohvatiPorukeAlert(odgovor.podaci));
+            return;
+        }
+        setProizvodi(odgovor.podaci);
+      }
+
+
+      async function dohvatiOsobe() {
+        const odgovor =  await OsobaService.getOsobe();
+        if(!odgovor.ok){
+            alert(dohvatiPorukeAlert(odgovor.podaci));
+            return;
+        }
+        setOsobe(odgovor.podaci);
+        setSifraOsoba(odgovor.podaci[0].sifra);
+          
+      }
+
+      async function dohvatiSkladistari() {
+        const odgovor =  await SkladistarService.get();
+        if(!odgovor.ok){
+          alert(dohvatiPorukeAlert(odgovor.podaci));
+          return;
+        }
+        setSkladistari(odgovor.podaci);
+        setSifraSkladistar(odgovor.podaci[0].sifra);
+      }
+
+      async function traziProizvod(uvjet) {
+        const odgovor =  await ProizvodService.traziProizvod(uvjet);
+        if(!odgovor.ok){
+          alert(dohvatiPorukeAlert(odgovor.podaci));
+          return;
+        }
+        setPronadeniProizvodi(odgovor.podaci);
+        setSearchName(uvjet);
+      }
+
+      async function traziOsoba(uvjet) {
+        const odgovor =  await OsobaService.traziOsoba(uvjet);
+        if(!odgovor.ok){
+          alert(dohvatiPorukeAlert(odgovor.podaci));
+          return;
+        }
+        setPronadeniOsobe(odgovor.podaci);
+        setSearchName(uvjet);
+      }
+
+      async function dohvatiInicijalnePodatke() {
+        await dohvatiOsobe();
+        await dohvatiSkladistare();
+        await dohvatiIzdatnica();
+        await dohvatiProizvodi();
+      }
+    
+      useEffect(() => {
+        dohvatiInicijalnePodatke();
+      }, []);
+
+      async function promjeni(e) {
+        const odgovor = await Service.promjeni(routeParams.sifra, e);
+        if(odgovor.ok){
+          navigate(RoutesNames.IZDATNICE_PROMJENI_PREGLED);
+          return;
+        }
+        alert(dohvatiPorukeAlert(odgovor.podaci));
+      }
+    
+      async function obrisiProizvod(grupa, proizvod) {
+        const odgovor = await Service.obrisiProizvod(grupa, proizvod);
+        if(odgovor.ok){
+          await dohvatiProizvodi();
+          return;
+        }
+        alert(dohvatiPorukeAlert(odgovor.podaci));
+
+        async function dodajProizvode(e) {
+            //console.log(e[0]);
+            const odgovor = await Service.dodajProizvod(routeParams.sifra, e[0].sifra);
+            if(odgovor.ok){
+              await dohvatiProizvodi();
+              return;
+            }
+            alert(dohvatiPorukeAlert(odgovor.podaci));
+          }
+      }
+    
+
 
     function handleSubmit(e){
         e.preventDefault();
@@ -69,26 +149,48 @@ export default function IzdatnicePromjeni(){
             datum = podaci.get('datum') + 'T' + podaci.get('vrijeme') + ':00.000Z';
           }
       
-
-        const izdatnica = 
-        {
-            brojIzdatnice: podaci.get('brojIzdatnice'),
+          promjeni({
+           brojIzdatnice: podaci.get('naziv'),
             datum: datum,
-            // proizvod: podaci.get('proizvod'),
-            osoba: podaci.get('osoba'),
-            skladistar: podaci.get('skladistar'),
+            OsobaSifra: parseInt(sifraOsoba), 
+            SkladistarSifra: parseInt(sifraSkladistar),
             napomena: podaci.get('napomena')
+     
+        });
+
+          async function dodajRucnoProizvod(Proizvod) {
+            const odgovor = await ProizvodService.dodaj(Proizvod);
+            if (odgovor.ok) {
+              const odgovor2 = await Service.dodajProizvod(routeParams.sifra, odgovor.podaci.sifra);
+              if (odgovor2?.ok) {
+                typeaheadRef.current.clear();
+                await dohvatiProizvodi();
+                return;
+              }
+              alert(dohvatiPorukeAlert(odgovor2.podaci));
+              return;
+            }
+            alert(dohvatiPorukeAlert(odgovor.podaci));
+              
+          }
+    
+          function dodajRucnoPolaznika(){
+            let niz = searchName.split(' ');
+            if(niz.length<2){
+              alert('Obavezno ime i prezime');
+              return;
+            }
+        
+            dodajRucnoPolaznik({
+              ime: niz[0],
+              prezime: niz[1],
+              oib: '',
+              email: '',
+              brojugovora: ''
+            });
+        
             
-            
-          };
-
-          
-          promjeniIzdatnicu(izdatnica);
-    }
-
-
-    return (
-
+          }
         <Container className='mt-4'>
            
            <Form onSubmit={handleSubmit}>
