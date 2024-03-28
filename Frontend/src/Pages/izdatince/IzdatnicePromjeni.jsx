@@ -1,10 +1,18 @@
-import { useEffect, useState } from "react";
-import { Button, Col, Container, Form, Row } from "react-bootstrap";
+import { useEffect, useState, useRef } from "react";
+import { Button, Col, Container, Form, Row ,Table } from "react-bootstrap";
 import { Link, useNavigate, useParams } from "react-router-dom";
-
+import { AsyncTypeahead } from 'react-bootstrap-typeahead';
 import { RoutesNames } from "../../constants";
 import IzdatnicaService from "../../services/IzdatnicaService";
+import { FaTrash } from 'react-icons/fa';
+import moment from 'moment';
 
+
+import Service from '../../services/IzdatnicaService';
+import SkladistarService from '../../services/SkladistarService';
+import OsobaService from '../../services/OsobaService';
+import ProizvodService from '../../services/ProizvodService';
+import { dohvatiPorukeAlert } from '../../services/httpService';
 
 
 export default function IzdatnicePromjeni(){
@@ -12,6 +20,14 @@ export default function IzdatnicePromjeni(){
     const navigate =useNavigate();
     const routeParams = useParams();
     const [izdatnica,setIzdatnica] = useState({});
+
+    const [Osobe, setOsobe] = useState([]);
+    const [sifraOsoba, setSifraOsoba] = useState(0);
+
+    const [smjerovi, setSmjerovi] = useState([]);
+  const [sifraSmjer, setSifraSmjer] = useState(0);
+
+
 
     async function dohvatiIzdatnicu(){
         await IzdatnicaService.getBySifra(routeParams.sifra)

@@ -9,10 +9,7 @@ namespace SKladisteAppl.Mappers;
 public class IzdatnicaMapper
 {
 
-    /// <summary>
-    /// Klasa Mapper za mapiranje entiteta naziv
-    /// </summary>
-    public static string? naziv { get; private set; }
+   
 
     /// <summary>
     /// Inicijalizira i konfigurira AutoMapper za mapiranje entiteta Izdatnica na IzdatnicaDTORead
@@ -29,6 +26,7 @@ public class IzdatnicaMapper
                          entitet.Sifra,
                          entitet.BrojIzdatnice,
                          entitet.Datum,
+                         
                          entitet.Osoba == null ? "" : (entitet.Osoba.Ime + " " + entitet.Osoba.Prezime).Trim(),
                          entitet.Skladistar == null ? "" : (entitet.Skladistar.Ime + " " + entitet.Skladistar.Prezime).Trim(),
                          entitet.Napomena));
