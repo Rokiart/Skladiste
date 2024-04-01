@@ -5,6 +5,8 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import OsobaService from "../../services/OsobaService";
 import { RoutesNames } from "../../constants";
 
+import useError from '../../hooks/useError';
+
 
 
 
@@ -13,19 +15,27 @@ export default function OsobePromjeni(){
     const [osoba,setOsoba] = useState({});
     const routeParams = useParams();
     const navigate =useNavigate();
+    const { prikaziError } = useError();
     
     
 
     async function dohvatiOsobu(){
-        await OsobaService
+        const odgovor = await OsobaService
         .getBySifra(routeParams.sifra)
-        .then((response)=>{
-            console.log(response);
-            setOsoba(response.data);
-          })
-          .catch((err)=>{ alert(e.poruka);
-            
-          });
+        if(!odgovor.ok){
+            prikaziError(odgovor.podaci);
+            return;
+          }
+          setOsoba(odgovor.podaci);
+    }
+
+    async function promjeniOsobu(osoba){
+        const odgovor = await OsobaService.promjeni(routeParams.sifra,osoba);
+        if(odgovor.ok){
+          navigate(RoutesNames.OSOBE_PREGLED);
+          return;
+        }
+        prikaziError(odgovor.podaci);
     }
 
     useEffect(()=>{
@@ -33,15 +43,7 @@ export default function OsobePromjeni(){
         dohvatiOsobu();
     },[]);
 
-    async function promjeniOsobu(osoba){
-        const odgovor = await OsobaService.promjeni(routeParams.sifra,osoba);
-        if(odgovor.ok){
-          navigate(RoutesNames.OSOBE_PREGLED);
-        }else{
-          
-          alert(odgovor.poruka);
-        }
-    }
+   
 
     function handleSubmit(e){
         e.preventDefault();

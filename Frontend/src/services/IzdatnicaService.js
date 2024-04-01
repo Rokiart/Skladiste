@@ -1,5 +1,5 @@
-import { App } from '../constants'
-import { httpService } from "./httpService";
+
+import { httpService, obradiGresku, obradiUspjeh, obradiUspjehBrisanje } from "./httpService";
 
 const naziv = 'Izdatnica';
 

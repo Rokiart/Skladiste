@@ -3,7 +3,7 @@ import {AxiosError} from 'axios';
 import { App } from "../constants";
 
 export const httpService = axios.create({
-    baseURL: 'https://romanzaric-001-site1.itempurl.com/api/v1',
+    baseURL: App.URL +'/api/v1',
     headers:{
         'Content-Type' : 'application/json'
     }
@@ -12,6 +12,11 @@ export const httpService = axios.create({
 export function obradiUspjeh(res){
     if(App.DEV) console.table(res.data);
     return {ok: true, podaci: res.data};
+}
+
+export function obradiUspjehBrisanje(res){
+    if(App.DEV) console.table(res.data);
+    return {ok: true, podaci: [kreirajPoruku('Poruka', res.data)]};
 }
 
 export function obradiGresku(e){

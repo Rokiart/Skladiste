@@ -2,10 +2,12 @@ import { Button, Col, Container, Form, Row } from "react-bootstrap";
 import { Link, useNavigate,  } from "react-router-dom";
 import { RoutesNames } from "../../constants";
 import OsobaService from "../../services/OsobaService";
+import useError from '../../hooks/useError';
 
 
 export default function OsobeDodaj() {
     const navigate = useNavigate();
+    const { prikaziError } = useError();
     
 
     async function dodajOsobu(osoba){
@@ -14,7 +16,7 @@ export default function OsobeDodaj() {
           navigate(RoutesNames.OSOBE_PREGLED);
         }else{
           console.log(odgovor);
-          alert(odgovor.poruka.errors);
+          prikaziError(odgovor.podaci);
         }
     }
 

@@ -3,6 +3,10 @@ import { Button, Col, Container, Form, Row } from 'react-bootstrap';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import ProizvodService from '../../services/ProizvodService';
 import { RoutesNames } from '../../constants';
+import useError from '../../hooks/useError';
+import InputText from '../../Components/InputText';
+import Akcije from '../../Components/Akcije';
+
 
 
 export default function ProizvodiPromjeni() {
@@ -10,17 +14,18 @@ export default function ProizvodiPromjeni() {
 
   const routeParams = useParams();
   const navigate = useNavigate();
+  const { prikaziError } = useError();
 
 
   async function dohvatiProizvod() {
 
-    await ProizvodService
+    const odgovor = await ProizvodService
       .getBySifra(routeParams.sifra)
-      .then((response) => {
-        console.log(response);
-        setProizvod(response.data);
-      })
-      .catch((err) => alert(err.poruka));
+      if(!odgovor.ok){
+        prikaziError(odgovor.podaci);
+        return;
+      }
+      setProizvod(odgovor.podaci);
 
   }
 
@@ -33,10 +38,9 @@ export default function ProizvodiPromjeni() {
 
     if (odgovor.ok) {
       navigate(RoutesNames.PROIZVODI_PREGLED);
-    } else {
-      alert(odgovor.poruka);
-
+      return;
     }
+    prikaziError(odgovor.podaci);
   }
 
   function handleSubmit(e) {
@@ -54,51 +58,11 @@ export default function ProizvodiPromjeni() {
   return (
     <Container className='mt-4'>
       <Form onSubmit={handleSubmit}>
-
-      <Form.Group className='mb-3' controlId='naziv'>
-          <Form.Label>Naziv</Form.Label>
-          <Form.Control
-            type='text'
-            name='naziv'
-            defaultValue={proizvod.naziv}
-            maxLength={50}
-            required
-          />
-        </Form.Group>
-
-        <Form.Group className='mb-3' controlId='sifraProizvoda'>
-          <Form.Label>Šifra Proizvoda</Form.Label>
-          <Form.Control
-            type='text'
-            name='sifraProizvoda'
-            defaultValue={proizvod.sifraProizvoda}
-            maxLength={50}
-          
-          />
-        </Form.Group>
-
-        <Form.Group className='mb-3' controlId='mjernaJedinica'>
-          <Form.Label>Mjerna Jedinica</Form.Label>
-          <Form.Control
-            type='text'
-            name='mjernaJedinica'
-            defaultValue={proizvod.mjernaJedinica}
-            maxLength={20}
-          />
-        </Form.Group>
-
-        <Row>
-          <Col>
-            <Link className='btn btn-danger gumb' to={RoutesNames.PROIZVODI_PREGLED}>
-              Odustani
-            </Link>
-          </Col>
-          <Col>
-            <Button variant='primary' className='gumb' type='submit'>
-              Promjeni podatke proizvoda
-            </Button>
-          </Col>
-        </Row>
+        <InputText atribut='Naziv' vrijednost={proizvod.naziv} />
+        <InputText atribut='sifraProizvoda' vrijednost={proizvod.sifraProizvoda} />
+        <InputText atribut='mjernaJedinica' vrijednost={proizvodk.mjernaJedinica} />
+       
+        <Akcije odustani={RoutesNames.PROIZVODI_PREGLED} akcija='Promjeni proizvod' /> 
       </Form>
     </Container>
   );

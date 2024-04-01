@@ -9,35 +9,38 @@ import { RoutesNames } from "../../constants";
 
 
 
+
+
 export default function Proizvodi(){
     const [Proizvodi,setProizvodi] = useState();
-    const navigate = useNavigate(); 
+    const navigate = useNavigate();
+    const { prikaziError } = useError(); 
 
     async function dohvatiProizvode(){
-        await ProizvodService.get()
-        .then((res)=>{
-            setProizvodi(res.data);
-        })
-        .catch((e)=>{
-            alert(e);
-        });
+        const odgovor = await ProizvodService.get();
+        if(!odgovor.ok){
+            prikaziError(odgovor.podaci);
+            return;
+        }
+        setProizvodi(odgovor.podaci);
     }
 
-    useEffect(()=>{
-       dohvatiProizvode();
-    },[]);
-
+   
 
 
     async function obrisiProizvod(sifra) {
         const odgovor = await ProizvodService.obrisi(sifra);
-    
+        prikaziError(odgovor.podaci);
         if (odgovor.ok) {
             dohvatiProizvode();
-        } else {
-          alert(odgovor.poruka);
+      
         }
       }
+
+      useEffect(()=>{
+        dohvatiProizvode();
+     },[]);
+ 
 
     return (
 

@@ -7,40 +7,41 @@ import { FaRegTrashAlt } from "react-icons/fa";
 import { Link, useNavigate } from "react-router-dom";
 import { RoutesNames } from "../../constants";
 
+import useError from "../../hooks/useError";
+
 
 
 export default function Osobe() {
 
     const [osobe,setOsobe] = useState();
     let navigate = useNavigate();
+    const { prikaziError } = useError();
     
 
     async function dohvatiOsobe(){
-        await OsobaService.get()
-        .then((res)=>{
-            setOsobe(res.data);
-        })
-        .catch((e)=>{
-            alert(e);
-        });
+        const odgovor = await OsobaService.get();
+        if(!odgovor.ok){
+            prikaziError(odgovor.podaci);
+            return;
+        }
+        setOsobe(odgovor.podaci);
     }
+
+    async function ObrisiOsobu(sifra){
+        const odgovor = await OsobaService.obrisi(sifra);
+        prikaziError(odgovor.podaci);
+        if (odgovor.ok){
+            
+            dohvatiOsobe();
+        }    
+    }
+
 
     useEffect(()=>{
         dohvatiOsobe();
     },[]);
 
-    async function ObrisiOsobu(sifra){
-        const odgovor = await OsobaService.obrisi(sifra);
-        if (odgovor.ok){
-            
-            dohvatiOsobe();
-        }
-        else {
-        alert(odgovor.poruka);
-        }
-        
-    }
-
+   
     return(
         <Container>
              <Link to={RoutesNames.OSOBE_NOVI} className="btn btn-success gumb">

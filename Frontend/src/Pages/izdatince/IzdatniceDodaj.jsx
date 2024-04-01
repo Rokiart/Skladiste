@@ -1,6 +1,7 @@
-import { Button, Col, Container, Form, Row } from 'react-bootstrap';
+import { Button, Col, Container, Form, Row, Table } from 'react-bootstrap';
 import { Link, useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
+import useError from '../../hooks/useError';
 
 
 import Service from '../../services/IzdatnicaService';
@@ -8,11 +9,16 @@ import SkladistarService from '../../services/SkladistarService';
 import OsobaService from '../../services/OsobaService';
 import ProizvodService from '../../services/ProizvodService';
 import { RoutesNames } from '../../constants';
+import useError from '../../hooks/useError';
+
+import moment from 'moment';
+
 
 
 
 export default function IzdatniceDodaj() {
   const navigate = useNavigate();
+  const { prikaziError } = useError();
   
 
   const [osobe , setOsobe] =useState([]);
@@ -21,18 +27,11 @@ export default function IzdatniceDodaj() {
   const [skladistari, setSkladistari] = useState([]);
   const [skladistarSifra, setSkladistarSifra] = useState(0);
 
-  const [proizvodi , setProizvodi] =useState([]);
-  const [pronadeniProizvodi, setPronadeniProizvodi] = useState([]);
-
-  const [searchName, setSearchName] = useState('');
-
-  const typeaheadRef = useRef(null);
-
   
   async function dohvatiOsobe(){
     const odgovor = await OsobaService.get();
     if(!odgovor.ok){
-      alert(dohvatiPorukeAlert(odgovor.podaci));
+      prikaziError(odgovor.podaci);
       return;
   }
   setOsobe(odgovor.podaci);
@@ -42,49 +41,49 @@ export default function IzdatniceDodaj() {
   async function dohvatiSkladistare(){
     const odgovor = await SkladistarService.get();
     if(!odgovor.ok){
-      alert(dohvatiPorukeAlert(odgovor.podaci));
+      prikaziError(odgovor.podaci);
       return;
   }
   setSkladistari(odgovor.podaci);
   setSkladistarSifra(odgovor.podaci[0].sifra);
 }
 
-  async function dohvatiProizvode(){
-    const odgovor =await ProizvodService.get();
-    if(!odgovor.ok){
-      alert(dohvatiPorukeAlert(odgovor.podaci));
-      return;
-  }
-  setProizvodi(odgovor.podaci);
-  setProizvodSifra(odgovor.podaci[0].sifra);
+async function ucitaj(){
+  await dohvatiOsobe();
+  await dohvatiSkladistare();
 }
 
-  async function ucitaj(){
-    await dohvatiOsobe();
-    await dohvatiSkladistare();
-    await dohvatiProizvode();
-  }
+useEffect(()=>{
+  ucitaj();
+},[]);
 
-  useEffect(()=>{
-    ucitaj();
-  },[]);
 
-  async function dodaj(e) {
-    const odgovor = await Service.dodaj(e);
-    if (odgovor.ok) {
-      navigate(RoutesNames.IZDATNICE_PREGLED);
-    } else {
-      alert(odgovor.poruka.podaci);
-    }
+async function dodaj(e) {
+  const odgovor = await Service.dodaj(e);
+  if(odgovor.ok){
+    navigate(RoutesNames.IZDATNICE_PREGLED);
+    return
   }
+  prikaziError(odgovor.podaci);
+  
+}
+
+//   async function dohvatiProizvode(){
+//     const odgovor =await ProizvodService.getProizvodi();
+//     if(!odgovor.ok){
+//       alert(dohvatiPorukeAlert(odgovor.podaci));
+//       return;
+//   }
+//   setProizvodi(odgovor.podaci);
+//   setProizvodSifra(odgovor.podaci[0].sifra);
+// }
+
 
   async function handleSubmit(e) {
     e.preventDefault();
 
     const podaci = new FormData(e.target);
-
     
-
     if(podaci.get('datum')=='' && podaci.get('vrijeme')!=''){
       alert('Ako postavljate vrijeme morate i datum');
       return;
@@ -95,11 +94,12 @@ export default function IzdatniceDodaj() {
     }else{
       datum = podaci.get('datum') + 'T' + podaci.get('vrijeme') + ':00.000Z';
     }
+    
 
       dodaj({
         brojIzdatnice: podaci.get('brojizdatnice'),
         datum: datum,
-        proizvodSifra: parseInt(proizvodSifra),
+        // proizvodSifra: parseInt(proizvodSifra),
         osobaSifra: parseInt(osobaSifra),
         skladistarSifra: parseInt(skladistarSifra),
         napomena: podaci.get('napomena')
@@ -137,7 +137,7 @@ export default function IzdatniceDodaj() {
           />
          </Form.Group>
 
-         <Form.Group className='mb-3' controlId='proizvod'>
+         {/* <Form.Group className='mb-3' controlId='proizvod'>
           <Form.Label>Proizvod</Form.Label>
             <Form.Select
               onChange={(e)=>{setProizvodSifra(e.target.value)}}
@@ -148,7 +148,7 @@ export default function IzdatniceDodaj() {
                    </option>
               ))}
              </Form.Select>
-          </Form.Group>
+          </Form.Group> */}
 
          <Form.Group className='mb-3' controlId='osoba'>
           <Form.Label>Osoba</Form.Label>

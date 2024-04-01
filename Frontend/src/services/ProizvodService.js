@@ -1,5 +1,5 @@
 
-import { httpService, obradiGresku, obradiUspjeh } from "./httpService";
+import { httpService, obradiGresku, obradiUspjeh, obradiUspjehBrisanje } from "./httpService";
 
 const naziv = 'Proizvod';
 

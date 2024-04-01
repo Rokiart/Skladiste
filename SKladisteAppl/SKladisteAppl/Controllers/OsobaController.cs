@@ -3,6 +3,8 @@ using SKladisteAppl.Extensions;
 using SKladisteAppl.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
+using System.Text;
+using Microsoft.EntityFrameworkCore;
 
 
 namespace SKladisteAppl.Controllers
@@ -94,8 +96,9 @@ namespace SKladisteAppl.Controllers
                 var osoba = _context.Osobe.Find(sifra);
                 if (osoba == null)
                 {
-                    return new EmptyResult();
+                    return BadRequest("Osoba s šifrom " + sifra + " ne postoji");
                 }
+                
                 return new JsonResult(osoba.MapOsobaInsertUpdatedToDTO());
             }
             catch (Exception ex)
@@ -111,24 +114,24 @@ namespace SKladisteAppl.Controllers
         ///     POST api/v1/Osoba
         ///     {naziv: "Primjer naziva"}
         /// </remarks>
-        /// <param name="dto">Osoba za unijeti u JSON formatu</param>
+        /// <param name="osobaDTO">Osoba za unijeti u JSON formatu</param>
         /// <response code="201">Kreirano</response>
         /// <response code="400">Zahtjev nije valjan (BadRequest)</response> 
         /// <response code="503">Baza nedostupna iz razno raznih razloga</response> 
         /// <returns>Osoba s šifrom koju je dala baza</returns>
         [HttpPost]
-        public IActionResult Post(OsobaDTOInsertUpdate dto)
+        public IActionResult Post(OsobaDTOInsertUpdate osobaDTO)
         {
-            if (!ModelState.IsValid || dto == null)
+            if (!ModelState.IsValid || osobaDTO == null)
             {
                 return BadRequest();
             }
             try
             {
-                var entitet = dto.MapOsobaInsertUpdateFromDTO(new Osoba());
-                _context.Osobe.Add(entitet);
+                var osoba = osobaDTO.MapOsobaInsertUpdateFromDTO(new Osoba());
+                _context.Osobe.Add(osoba);
                 _context.SaveChanges();
-                return StatusCode(StatusCodes.Status201Created, entitet.MapOsobaReadToDTO());
+                return StatusCode(StatusCodes.Status201Created, osoba.MapOsobaReadToDTO());
 
             }catch (Exception ex)
             
@@ -157,7 +160,7 @@ namespace SKladisteAppl.Controllers
         ///
         /// </remarks>
         /// <param name="sifra">Šifra osobe koji se mijenja</param>  
-        /// <param name="dto">Osoba za unijeti u JSON formatu</param>  
+        /// <param name="osobaDTO">Osoba za unijeti u JSON formatu</param>  
         /// <returns>Svi poslani podaci od osoba koji su spremljeni u bazi</returns>
         /// <response code="200">Sve je u redu</response>
         /// <response code="204">Nema u bazi osobe kojeu želimo promijeniti</response>
@@ -165,9 +168,9 @@ namespace SKladisteAppl.Controllers
         /// <response code="503">Baza nedostupna</response> 
         [HttpPut]
         [Route("{sifra:int}")]
-        public IActionResult Put(int sifra, OsobaDTOInsertUpdate dto)
+        public IActionResult Put(int sifra, OsobaDTOInsertUpdate osobaDTO)
         {
-            if (sifra <= 0 || !ModelState.IsValid || dto == null)
+            if (sifra <= 0 || !ModelState.IsValid || osobaDTO == null)
             {
                 return BadRequest();
             }
@@ -177,19 +180,19 @@ namespace SKladisteAppl.Controllers
             {
 
 
-                var entitetIzBaze = _context.Osobe.Find(sifra);
+                var osobaIzBaze = _context.Osobe.Find(sifra);
 
-                if (entitetIzBaze == null)
+                if (osobaIzBaze == null)
                 {
-                    return StatusCode(StatusCodes.Status204NoContent, sifra);
+                    return BadRequest("Ne postoje osobe s šifrom " + sifra + " u bazi");
                 }
 
-                var entitet = dto.MapOsobaInsertUpdateFromDTO(entitetIzBaze);
+                var osoba = osobaDTO.MapOsobaInsertUpdateFromDTO(osobaIzBaze);
 
-                _context.Osobe.Update(entitetIzBaze);
+                _context.Osobe.Update(osoba);
                 _context.SaveChanges();
 
-                return StatusCode(StatusCodes.Status200OK, entitetIzBaze.MapOsobaInsertUpdatedToDTO());
+                return StatusCode(StatusCodes.Status200OK, osoba.MapOsobaInsertUpdatedToDTO());
             }
             catch (Exception ex)
             {
@@ -225,17 +228,31 @@ namespace SKladisteAppl.Controllers
 
             try
             {
-                var entitetIzbaze = _context.Osobe.Find(sifra);
+                var osobaIzbaze = _context.Osobe.Find(sifra);
 
-                if (entitetIzbaze == null)
+                if (osobaIzbaze == null)
                 {
-                    return StatusCode(StatusCodes.Status204NoContent, sifra);
+                    return BadRequest("Ne postoji osoba s šifrom " + sifra + " u bazi");
                 }
 
-                _context.Osobe.Remove(entitetIzbaze);
+                var lista = _context.Izdatnice.Include(x => x.Osoba).Where(x => x.Osoba.Sifra == sifra).ToList();
+
+                if (lista != null && lista.Count() > 0)
+                {
+                    StringBuilder sb = new StringBuilder();
+                    sb.Append("Osoba se ne može obrisati jer je postavljena na izdatnicia: ");
+                    foreach (var e in lista)
+                    {
+                        sb.Append(e.BrojIzdatnice).Append(", ");
+                    }
+
+                    return BadRequest(sb.ToString().Substring(0, sb.ToString().Length - 2));
+                }
+
+                _context.Osobe.Remove(osobaIzbaze);
                 _context.SaveChanges();
 
-                return new JsonResult("{\"poruka\": \"Obrisano\"}"); // ovo nije baš najbolja praksa ali da znake kako i to može
+                return Ok("Obrisano");
 
             }
             catch (Exception ex)

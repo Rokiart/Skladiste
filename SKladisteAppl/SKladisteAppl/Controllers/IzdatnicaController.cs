@@ -5,6 +5,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SKladisteAppl.Extensions;
 using IzdatnicaDTOInsertUpdate = SKladisteAppl.Models.IzdatnicaDTOInsertUpdate;
+using System.Text;
+using Microsoft.AspNetCore.Http.HttpResults;
 
 
 
@@ -61,7 +63,7 @@ namespace SKladisteAppl.Controllers
                 if (lista == null || lista.Count == 0)
                    
                 {
-                    return new EmptyResult();
+                    return BadRequest("Ne postoje izdatnice u bazi");
                 }
                 return new JsonResult(lista.MapIzdatnicaReadList());
             }
@@ -100,7 +102,7 @@ namespace SKladisteAppl.Controllers
                     .Include(i => i.Proizvodi).FirstOrDefault(x => x.Sifra == sifra);
                 if (p == null)
                 {
-                    return new EmptyResult();
+                    return BadRequest("Ne postoji izdatnica s šifrom " + sifra + " u bazi");
                 }
                 return new JsonResult(p);
             }
@@ -134,14 +136,14 @@ namespace SKladisteAppl.Controllers
 
             if (osoba == null)
             {
-                return BadRequest();
+                return BadRequest("Ne postoji osoba s šifrom " + dto.osobasifra + " u bazi");
             }
 
             var skladistar = _context.Skladistari.Find(dto.skladistarSifra);
 
             if (skladistar == null)
             {
-                return BadRequest();
+                return BadRequest("Ne postoji skladistar s šifrom " + dto.skladistarSifra + " u bazi");
             }
 
 
@@ -195,7 +197,7 @@ namespace SKladisteAppl.Controllers
         {
             if (sifra <= 0 || !ModelState.IsValid || dto == null)
             {
-                return BadRequest();
+                return BadRequest(ModelState);
             }
 
 
@@ -214,14 +216,14 @@ namespace SKladisteAppl.Controllers
 
                 if (osoba == null)
                 {
-                    return BadRequest();
+                    return BadRequest("Ne postoji osoba s šifrom " + dto.osobasifra + " u bazi");
                 }
 
                 var skladistar = _context.Skladistari.Find(dto.skladistarSifra);
 
                 if (skladistar == null)
                 {
-                    return BadRequest();
+                    return BadRequest("Ne postoji skladistar s šifrom " + dto.skladistarSifra + " u bazi");
                 }
 
 
@@ -264,22 +266,34 @@ namespace SKladisteAppl.Controllers
         {
             if (!ModelState.IsValid || sifra <= 0)
             {
-                return BadRequest();
+                return BadRequest(ModelState);
             }
 
             try
             {
-                var entitetIzBaze = _context.Izdatnice.Find(sifra);
+                var entitetIzBaze = _context.Izdatnice.Include(g => g.Proizvodi).FirstOrDefault(g => g.Sifra == sifra);
 
                 if (entitetIzBaze == null)
                 {
-                    return StatusCode(StatusCodes.Status204NoContent, sifra);
+                    return BadRequest("Ne postoji izdatnica s šifrom " + sifra + " u bazi");
+                }
+
+                if (entitetIzBaze.Proizvodi != null && entitetIzBaze.Proizvodi.Count() > 0)
+                {
+                    StringBuilder sb = new StringBuilder();
+                    sb.Append("Izdatnica se ne može obrisati jer su na njoj proizvodi: ");
+                    foreach (var e in entitetIzBaze.Proizvodi)
+                    {
+                        sb.Append(e.Naziv).Append(", ");
+                    }
+
+                    return BadRequest(sb.ToString().Substring(0, sb.ToString().Length - 2));
                 }
 
                 _context.Izdatnice.Remove(entitetIzBaze);
                 _context.SaveChanges();
 
-                return new JsonResult("{\"poruka\": \"Obrisano\"}"); // ovo nije baš najbolja praksa ali da znake kako i to može
+                return Ok("Obrisano");
 
             }
             catch (Exception ex)
@@ -305,7 +319,7 @@ namespace SKladisteAppl.Controllers
                     .Include(i => i.Proizvodi).FirstOrDefault(x => x.Sifra == sifraIzdatnice);
                 if (p == null)
                 {
-                    return new EmptyResult();
+                    return BadRequest("Ne postoji izdatnica s šifrom " + sifraIzdatnice + " u bazi");
                 }
                 return new JsonResult(p.Proizvodi!.MapProizvodReadList());
             }
@@ -329,7 +343,7 @@ namespace SKladisteAppl.Controllers
 
             if (sifra <= 0 || proizvodSifra <= 0)
             {
-                return BadRequest();
+                return BadRequest("Šifra izdatnice ili proivoda nije dobra");
             }
 
             try
@@ -341,14 +355,14 @@ namespace SKladisteAppl.Controllers
 
                 if (izdatnica == null)
                 {
-                    return BadRequest();
+                    return BadRequest("Ne postoji izdatnica s šifrom " + sifra + " u bazi");
                 }
 
                 var proizvod = _context.Proizvodi.Find(proizvodSifra);
 
                 if (proizvod == null)
                 {
-                    return BadRequest();
+                    return BadRequest("Ne postoji proizvod s šifrom " + proizvodSifra + " u bazi");
                 }
 
                 izdatnica.Proizvodi.Add(proizvod);
@@ -373,7 +387,7 @@ namespace SKladisteAppl.Controllers
 
         [HttpDelete]
         [Route("{sifra:int}/obrisi/{proizvodSifra:int}")]
-        public IActionResult ObrisiIzdatnicu(int sifra, int proizvodSifra)
+        public IActionResult ObrisiProizvod(int sifra, int proizvodSifra)
         {
 
             if (!ModelState.IsValid)
@@ -402,7 +416,7 @@ namespace SKladisteAppl.Controllers
 
                 if (proizvod == null)
                 {
-                    return BadRequest();
+                    return BadRequest("Ne postoji proizvod s šifrom " + proizvodSifra + " u bazi");
                 }
 
 

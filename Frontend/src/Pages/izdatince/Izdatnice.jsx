@@ -7,9 +7,9 @@ import { Link, useNavigate } from "react-router-dom";
 import moment from "moment";
 
 import IzdatnicaService from "../../services/IzdatnicaService";
-import { dohvatiPorukeAlert } from "../../services/httpService";
-import ProizvodService from "../../services/ProizvodService";
+
 import { RoutesNames } from "../../constants";
+import useError from "../../hooks/useError";
 
 
 
@@ -17,50 +17,34 @@ export default function Izdatnice() {
 
     const [Izdatnice,setIzdatnice] = useState();
     let navigate = useNavigate(); 
-
-    const [Proizvodi, setProizvodi] = useState([]);
-   
-
+     
+     const { prikaziError } = useError();
 
     async function dohvatiIzdatnice(){
         const odgovor =await IzdatnicaService.get();
         if(!odgovor.ok){
-            alert(dohvatiPorukeAlert(odgovor.podaci));
+            prikaziError(odgovor.podaci);
             return;
         }
-        setIzdatnice(odgovor.podaci);
-        setSifraIzdatnica(odgovor.podaci[0].sifra);
+        setIzdatnice(odgovor.podaci);  
     }
 
-    async function dohvatiProizvodi() {
-        const odgovor = await ProizvodService.get();
-        if(!odgovor.ok){
-            alert(dohvatiPorukeAlert(odgovor.podaci));
-            return;
-        }
-        setProizvodi(odgovor.podaci);
-        setSifraProizvod(odgovor.podaci[0].sifra);
-      }
-        
 
     async function ObrisiIzdatnicu(sifra){
       
         const odgovor = await IzdatnicaService.obrisi(sifra);
-        alert(dohvatiPorukeAlert(odgovor.podaci));
+        prikaziError(odgovor.podaci);
         if (odgovor.ok){
            
             dohvatiIzdatnice();
-            dohvatiProizvodi();
+         
         }
         
     }
 
   
-   
-
-    useEffect(()=>{
+       useEffect(()=>{
         dohvatiIzdatnice();
-        dohvatiProizvodi();
     
 
     },[]);
@@ -87,7 +71,7 @@ export default function Izdatnice() {
                   <tr>
                      <th>BrojIzdatnice</th>
                      <th>Datum</th>
-                     <th>Proizvod</th>
+                     {/* <th>Proizvodi</th> */}
                      <th>Osoba</th>
                      <th>Skladistar</th> 
                      <th>Napomena</th>
@@ -108,7 +92,7 @@ export default function Izdatnice() {
                              
                                
                               </td>
-                              <td>{izdatnica.proizvodNaziv}</td>
+                              {/* <td>{izdatnica.proizvodiPopis}</td> */}
                             <td>{izdatnica.osobaImePrezime}</td>
                             <td>{izdatnica.skladistarImePrezime}</td> 
                             <td>{izdatnica.napomena}</td>
