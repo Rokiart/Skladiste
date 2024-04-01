@@ -1,4 +1,4 @@
-import { Button, Col, Container, Form, Row, Table } from 'react-bootstrap';
+import { Button, Col, Container, Form, Row} from 'react-bootstrap';
 import { Link, useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import useError from '../../hooks/useError';
@@ -7,19 +7,15 @@ import useError from '../../hooks/useError';
 import Service from '../../services/IzdatnicaService';
 import SkladistarService from '../../services/SkladistarService';
 import OsobaService from '../../services/OsobaService';
-import ProizvodService from '../../services/ProizvodService';
+
 import { RoutesNames } from '../../constants';
 import useError from '../../hooks/useError';
-
-import moment from 'moment';
-
 
 
 
 export default function IzdatniceDodaj() {
   const navigate = useNavigate();
-  const { prikaziError } = useError();
-  
+   
 
   const [osobe , setOsobe] =useState([]);
   const [osobaSifra, setOsobaSifra] =useState(0);
@@ -27,6 +23,7 @@ export default function IzdatniceDodaj() {
   const [skladistari, setSkladistari] = useState([]);
   const [skladistarSifra, setSkladistarSifra] = useState(0);
 
+  const { prikaziError } = useError();
   
   async function dohvatiOsobe(){
     const odgovor = await OsobaService.get();

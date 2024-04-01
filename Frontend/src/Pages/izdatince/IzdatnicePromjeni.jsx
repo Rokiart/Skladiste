@@ -5,9 +5,9 @@ import { AsyncTypeahead } from 'react-bootstrap-typeahead';
 import { RoutesNames } from "../../constants";
 
 import { FaTrash } from 'react-icons/fa';
-import moment from 'moment';
 
 
+import useError from '../../hooks/useError';
 import Service from '../../services/IzdatnicaService';
 import SkladistarService from '../../services/SkladistarService';
 import OsobaService from '../../services/OsobaService';
@@ -91,15 +91,7 @@ export default function IzdatnicePromjeni(){
         setSearchName(uvjet);
       }
 
-      async function traziProizvod(uvjet) {
-        const odgovor =  await ProizvodService.traziProizvod(uvjet);
-        if(!odgovor.ok){
-          prikaziError(odgovor.podaci);
-          return;
-        }
-        setPronadeniProizvodi(odgovor.podaci);
-        setSearchName(uvjet);
-      }
+
 
       async function dohvatiInicijalnePodatke() {
         await dohvatiOsobe();
@@ -121,8 +113,8 @@ export default function IzdatnicePromjeni(){
         prikaziError(odgovor.podaci);
       }
     
-      async function obrisiProizvod(grupa, proizvod) {
-        const odgovor = await Service.obrisiProizvod(grupa, proizvod);
+      async function obrisiProizvod(izdatnica, proizvod) {
+        const odgovor = await Service.obrisiProizvod(izdatnica, proizvod);
         if(odgovor.ok){
           await dohvatiProizvodi();
           return;
@@ -180,6 +172,7 @@ export default function IzdatnicePromjeni(){
                 return;
               }
               prikaziError(odgovor.podaci);
+              return;
             }
             prikaziError(odgovor.podaci);
               
@@ -188,14 +181,14 @@ export default function IzdatnicePromjeni(){
           function dodajRucnoProizvod(){
             let niz = searchName.split(' ');
             if(niz.length<2){
-              alert('Obavezno naziv');
+              prikaziError([{svojstvo:'',poruka:'Obavezan naziv'}]);
               return;
             }
         
             dodajRucnoProizvod({
               naziv: niz[0],
-              sifraProizvoda: niz[1],
-              mjernaJedinica: niz[2]
+              sifraProizvoda: '',
+              mjernaJedinica: '',
              
             });
         
@@ -207,45 +200,30 @@ export default function IzdatnicePromjeni(){
            
            <Form onSubmit={handleSubmit}>
            <Row>
-                 <Col key='1' sm={12} lg={6} md={6}> 
-                <Form.Group  className='mb-3' controlId="brojIzdatnice">
-                    <Form.Label>Broj Izdatnice</Form.Label>
-                    <Form.Control 
-                        type="text"
-                        defaultValue={izdatnica.brojIzdatnice}
-                        name="brojIzdatnice"
-                        maxLength={50}
-                       
-                    />
+          <Col key='1' sm={12} lg={6} md={6}>
+            <InputText atribut='brojIzdatnice' vrijednost={izdatnica.brojIzdatnice} />
+            <Row>
+              <Col key='1' sm={12} lg={6} md={6}>
+                <Form.Group className='mb-3' controlId='datum'>
+                  <Form.Label>Datum</Form.Label>
+                  <Form.Control
+                    type='date'
+                    name='datum'
+                    defaultValue={grupa.datum}
+                  />
                 </Form.Group>
-                <Row>
-                     <Col key='1' sm={12} lg={6} md={6}>   
-                <Form.Group className='mb-3' controlId="datum">
-                    <Form.Label>Datum</Form.Label>
-                    <Form.Control 
-                        type="text"
-                        defaultValue={izdatnica.datum}
-                        name="datum"
-                        
-                    />
-                </Form.Group>
-                </Col>
-                   <Col key='2' sm={12} lg={6} md={6}>
-
+              </Col>
+              <Col key='2' sm={12} lg={6} md={6}>
                 <Form.Group className='mb-3' controlId='vrijeme'>
-                    <Form.Label>Vrijeme</Form.Label>
-                    <Form.Control
-                         type='time'
-                         name='vrijeme'
-                         defaultValue={izdatnica.vrijeme}
-                         
-                    />
+                  <Form.Label>Vrijeme</Form.Label>
+                  <Form.Control
+                    type='time'
+                    name='vrijeme'
+                    defaultValue={grupa.vrijeme}
+                  />
                 </Form.Group>
-                </Col>
-                   </Row>
-
-
-              
+              </Col>
+            </Row>      
                 
                 <Form.Group className='mb-3' controlId='osoba'>
           <Form.Label>Osoba</Form.Label>

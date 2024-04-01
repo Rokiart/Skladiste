@@ -71,7 +71,7 @@ export default function Izdatnice() {
                   <tr>
                      <th>BrojIzdatnice</th>
                      <th>Datum</th>
-                     {/* <th>Proizvodi</th> */}
+                     <th>Proizvodi</th>
                      <th>Osoba</th>
                      <th>Skladistar</th> 
                      <th>Napomena</th>
@@ -92,7 +92,7 @@ export default function Izdatnice() {
                              
                                
                               </td>
-                              {/* <td>{izdatnica.proizvodiPopis}</td> */}
+                              <td>{izdatnica.proizvodiPopis}</td>
                             <td>{izdatnica.osobaImePrezime}</td>
                             <td>{izdatnica.skladistarImePrezime}</td> 
                             <td>{izdatnica.napomena}</td>
