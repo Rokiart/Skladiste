@@ -3,8 +3,6 @@ using SKladisteAppl.Data;
 using SKladisteAppl.Models;
 using Microsoft.Data.SqlClient;
 using SKladisteAppl.Extensions;
-using System.Text;
-using Microsoft.EntityFrameworkCore;
 
 namespace SKladisteAppl.Controllers
 {
@@ -61,7 +59,7 @@ namespace SKladisteAppl.Controllers
                 var lista = _context.Skladistari.ToList();
                 if (lista == null || lista.Count == 0)
                 {
-                    return BadRequest("Ne postoje skladistari u bazi");
+                    return new EmptyResult();
                 }
                 return new JsonResult(lista.MapSkladistarReadList());
             }
@@ -99,7 +97,7 @@ namespace SKladisteAppl.Controllers
                 var p = _context.Skladistari.Find(sifra);
                 if (p == null)
                 {
-                    return BadRequest("Ne postoji skladistar s šifrom " + sifra + " u bazi");
+                    return new EmptyResult();
                 }
                 return new JsonResult(p.MapSkladistarInsertUpdatedToDTO());
             }
@@ -174,7 +172,7 @@ namespace SKladisteAppl.Controllers
         {
             if (sifra <= 0 || !ModelState.IsValid || dto == null)
             {
-                return BadRequest(ModelState);
+                return BadRequest();
             }
 
             try
@@ -183,7 +181,7 @@ namespace SKladisteAppl.Controllers
 
                 if (entitetIzBaze == null)
                 {
-                    return BadRequest("Ne postoji skladištar s šifrom " + sifra + " u bazi");
+                    return StatusCode(StatusCodes.Status204NoContent, sifra);
                 }
 
                 var entitet = dto.MapSkladistarInsertUpdateFromDTO(entitetIzBaze);
@@ -230,28 +228,13 @@ namespace SKladisteAppl.Controllers
 
                 if (entitetIzBaze == null)
                 {
-                    return BadRequest("Ne postoji skladistar s šifrom " + sifra + " u bazi");
+                    return StatusCode(StatusCodes.Status204NoContent, sifra);
                 }
-
-                var lista = _context.Izdatnice.Include(x => x.Skladistar).Where(x => x.Skladistar.Sifra == sifra).ToList();
-
-                if (lista != null && lista.Count() > 0)
-                {
-                    StringBuilder sb = new StringBuilder();
-                    sb.Append("Skladištar se ne može obrisati jer je postavljen na izdatnici: ");
-                    foreach (var e in lista)
-                    {
-                        sb.Append(e.BrojIzdatnice).Append(", ");
-                    }
-
-                    return BadRequest(sb.ToString().Substring(0, sb.ToString().Length - 2));
-                }
-
 
                 _context.Skladistari.Remove(entitetIzBaze);
                 _context.SaveChanges();
 
-                return Ok("Obrisano");
+                return new JsonResult("{\"poruka\": \"Obrisano\"}");
 
             }
             catch (Exception ex)
@@ -274,14 +257,7 @@ namespace SKladisteAppl.Controllers
         {
             if (datoteka == null)
             {
-                return BadRequest("Datoteka nije postavljena");
-            }
-
-            var entitetIzbaze = _context.Skladistari.Find(sifraSkladistar);
-
-            if (entitetIzbaze == null)
-            {
-                return BadRequest("Ne postoji skladistar s šifrom " + sifraSkladistar + " u bazi");
+                return BadRequest();
             }
             try
             {

@@ -1,9 +1,8 @@
 ﻿using SKladisteAppl.Data;
 using Microsoft.AspNetCore.Mvc;
 using SKladisteAppl.Models;
+using Microsoft.Data.SqlClient;
 using SKladisteAppl.Extensions;
-using System.Text;
-using Microsoft.EntityFrameworkCore;
 
 namespace SKladisteAppl.Controllers
 {
@@ -54,7 +53,7 @@ namespace SKladisteAppl.Controllers
                 var lista = _context.Proizvodi.ToList();
                 if (lista == null || lista.Count == 0)
                 {
-                    return BadRequest("Ne postoje proizvodi u bazi");
+                    return new EmptyResult();
                 }
                 return new JsonResult(lista.MapProizvodReadList());
             }
@@ -94,7 +93,7 @@ namespace SKladisteAppl.Controllers
                 var p = _context.Proizvodi.Find(sifra);
                 if (p == null)
                 {
-                    return BadRequest("Ne postoji proizvod s šifrom " + sifra + " u bazi");
+                    return new EmptyResult();
                 }
                 return new JsonResult(p.MapProizvodInsertUpdatedToDTO());
             }
@@ -122,7 +121,7 @@ namespace SKladisteAppl.Controllers
         {
             if (!ModelState.IsValid || dto == null)
             {
-                return BadRequest(ModelState);
+                return BadRequest();
             }
             try
             {
@@ -169,7 +168,7 @@ namespace SKladisteAppl.Controllers
         {
             if (sifra <= 0 || !ModelState.IsValid || dto == null)
             {
-                return BadRequest(ModelState);
+                return BadRequest();
             }
 
 
@@ -181,7 +180,7 @@ namespace SKladisteAppl.Controllers
 
                 if (entitetIzBaze == null)
                 {
-                    return BadRequest("Ne postoji proizvod s šifrom " + sifra + " u bazi");
+                    return StatusCode(StatusCodes.Status204NoContent, sifra);
                 }
 
                 entitetIzBaze = dto.MapProizvodInsertUpdateFromDTO(entitetIzBaze);
@@ -227,30 +226,17 @@ namespace SKladisteAppl.Controllers
 
             try
             {
+                var proizvodIzBaze = _context.Proizvodi.Find(sifra);
 
-                var entitetIzbaze = _context.Proizvodi.Include(x => x.Izdatnice).FirstOrDefault(x => x.Sifra == sifra);
-
-                if (entitetIzbaze == null)
+                if (proizvodIzBaze == null)
                 {
-                    return BadRequest("Ne postoji proizvod s šifrom " + sifra + " u bazi");
+                    return StatusCode(StatusCodes.Status204NoContent, sifra);
                 }
 
-                if (entitetIzbaze.Izdatnice != null && entitetIzbaze.Izdatnice.Count() > 0)
-                {
-                    StringBuilder sb = new StringBuilder();
-                    sb.Append("Proizvod se ne može obrisati jer je postavljen na izdatnici: ");
-                    foreach (var e in entitetIzbaze.Izdatnice)
-                    {
-                        sb.Append(e.BrojIzdatnice).Append(", ");
-                    }
-
-                    return BadRequest(sb.ToString().Substring(0, sb.ToString().Length - 2));
-                }
-
-                _context.Proizvodi.Remove(entitetIzbaze);
+                _context.Proizvodi.Remove(proizvodIzBaze);
                 _context.SaveChanges();
 
-                return Ok("Obrisano");
+                return new JsonResult("{\"poruka\": \"Obrisano\"}"); // ovo nije baš najbolja praksa ali da znake kako i to može
 
             }
             catch (Exception ex)
