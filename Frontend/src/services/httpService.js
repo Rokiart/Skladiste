@@ -3,11 +3,28 @@ import {AxiosError} from 'axios';
 import { App } from "../constants";
 
 export const httpService = axios.create({
-    baseURL: App.URL +'/api/v1',
+    baseURL: App.URL + '/api/v1',
     headers:{
-        'Content-Type' : 'application/json'
+        'Content-Type': 'application/json'
     }
 });
+
+export async function get(naziv){
+    return await httpService.get('/' + naziv).then((res)=>{return obradiUspjeh(res);}).catch((e)=>{ return obradiGresku(e);});
+}
+export async function getBySifra(naziv,sifra) {
+    return await httpService.get('/'+naziv+'/' + sifra).then((res)=>{return obradiUspjeh(res);}).catch((e)=>{ return obradiGresku(e);});
+    }
+export async function dodaj(naziv,entitet) {
+return await httpService.post('/' + naziv, entitet).then((res)=>{return obradiUspjeh(res);}).catch((e)=>{ return obradiGresku(e);});
+}
+export async function promjeni(naziv,sifra, entitet) {
+return await httpService.put('/'+naziv+'/' + sifra, entitet).then((res)=>{return obradiUspjehBrisanje(res);}).catch((e)=>{ return obradiGresku(e);});
+}
+export async function obrisi(naziv,sifra) {
+    return await httpService.delete('/' + naziv + '/' + sifra).then((res)=>{return obradiUspjehBrisanje(res);}).catch((e)=>{ return obradiGresku(e);});
+}
+    
 
 export function obradiUspjeh(res){
     if(App.DEV) console.table(res.data);

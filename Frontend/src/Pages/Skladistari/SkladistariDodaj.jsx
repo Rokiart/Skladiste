@@ -1,8 +1,7 @@
-import { Button, Col, Container, Form, Row } from "react-bootstrap";
-import { Link, useNavigate,  } from "react-router-dom";
+import { Container, Form } from "react-bootstrap";
+import { useNavigate  } from "react-router-dom";
 import { RoutesNames } from "../../constants";
 import SkladistarService from "../../services/SkladistarService";
-
 import useError from '../../hooks/useError';
 import InputText from "../../Components/InputText";
 import Akcije from "../../Components/Akcije";

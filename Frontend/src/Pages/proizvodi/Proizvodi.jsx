@@ -6,7 +6,7 @@ import { FaEdit, FaTrash } from "react-icons/fa";
 import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import { RoutesNames } from "../../constants";
-
+import useError from "../../hooks/useError";
 
 
 
@@ -17,7 +17,7 @@ export default function Proizvodi(){
     const { prikaziError } = useError(); 
 
     async function dohvatiProizvode(){
-        const odgovor = await ProizvodService.get();
+        const odgovor = await ProizvodService.get('Proizvod');
         if(!odgovor.ok){
             prikaziError(odgovor.podaci);
             return;
@@ -29,7 +29,7 @@ export default function Proizvodi(){
 
 
     async function obrisiProizvod(sifra) {
-        const odgovor = await ProizvodService.obrisi(sifra);
+        const odgovor = await ProizvodService.obrisi('Proizvod',sifra);
         prikaziError(odgovor.podaci);
         if (odgovor.ok) {
             dohvatiProizvode();
