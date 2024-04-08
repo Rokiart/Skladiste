@@ -36,10 +36,7 @@ namespace SKladisteAppl.Models
         /// </summary>
         public string? Napomena { get; set; }
 
-        /// <summary>
-        /// Lista proizvoda koji su vezani uz izdatnicu.
-        /// </summary>
-        public List<Proizvod>? Proizvodi { get; set; }
+    
        
     }
 }

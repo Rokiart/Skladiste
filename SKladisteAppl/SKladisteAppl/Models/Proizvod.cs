@@ -8,6 +8,7 @@
         /// <summary>
         /// Naziv proizvoda.
         /// </summary>
+        
         public string? Naziv { get; set; }
 
         /// <summary>
@@ -20,9 +21,6 @@
         /// </summary>
         public string? Mjernajedinica { get; set; }
 
-        /// <summary>
-        /// Izdatnice koje sadrže ovaj proizvod.
-        /// </summary>
-        public ICollection<Izdatnica>? Izdatnice { get; } = new List<Izdatnica>();
+       
     }
 }

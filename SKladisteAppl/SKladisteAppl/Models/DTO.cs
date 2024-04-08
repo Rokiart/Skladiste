@@ -57,6 +57,16 @@ namespace SKladisteAppl.Models
     /// </summary>
     public record IzdatnicaDTOInsertUpdate(string? brojizdatnice,
         DateTime? datum, int? osobasifra, int? skladistarSifra, string napomena);
-    
+
+    public record IzdatnicaProizvodSTORead(int? sifra, string? naziv, int? kolicina);
+
+    public record IzdatnicaProizvodSTOInsertUpdate(int? izdatnicaSifra, int? proizvodSifra, [Required(ErrorMessage = "Kolicina obavezno")] string? kolicina);
+
+    public record OperaterDTO(
+       [Required(ErrorMessage = "Email obavezno")]
+        string? email,
+       [Required(ErrorMessage = "Lozinka obavezno")]
+        string? password);
+
 }
 

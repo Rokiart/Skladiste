@@ -2,7 +2,6 @@
 using Microsoft.EntityFrameworkCore;
 using System.Text.RegularExpressions;
 
-
 namespace SKladisteAppl.Data
 {
     /// <summary>
@@ -44,6 +43,8 @@ namespace SKladisteAppl.Data
         /// Izdatnice u bazi
         /// </summary>
         public DbSet<Izdatnica> Izdatnice{ get; set; }
+        public IEnumerable<object> Operateri { get; internal set; }
+
         /// <summary>
         /// Implementacije veza
         /// </summary>
