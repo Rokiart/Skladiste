@@ -2,12 +2,13 @@
 import { useEffect, useState } from "react";
 import { Container, Form } from "react-bootstrap";
 import { useNavigate, useParams } from "react-router-dom";
-import OsobaService from "../../services/OsobaService";
+import Service from "../../services/OsobaService";
 import { RoutesNames } from "../../constants";
+import useError from "../../hooks/useError";
 
-import useError from '../../hooks/useError';
-import InputText from "../../Components/InputText";
 import Akcije from "../../Components/Akcije";
+import InputText from "../../Components/InputText";
+
 
 
 
@@ -22,8 +23,8 @@ export default function OsobePromjeni(){
     
 
     async function dohvatiOsobu(){
-        const odgovor = await OsobaService
-        .getBySifra(routeParams.sifra)
+        const odgovor = await Service
+        .getBySifra('Osoba',routeParams.sifra)
         if(!odgovor.ok){
             prikaziError(odgovor.podaci);
             return;
@@ -31,8 +32,8 @@ export default function OsobePromjeni(){
           setOsoba(odgovor.podaci);
     }
 
-    async function promjeniOsobu(osoba){
-        const odgovor = await OsobaService.promjeni(routeParams.sifra,osoba);
+    async function promjeniOsoba(osoba){
+        const odgovor = await Service.promjeni('Osoba',routeParams.sifra,osoba);
         if(odgovor.ok){
           navigate(RoutesNames.OSOBE_PREGLED);
           return;
@@ -51,7 +52,7 @@ export default function OsobePromjeni(){
         e.preventDefault();
         const podaci = new FormData(e.target);
             
-            promjeniOsobu({
+            promjeniOsoba({
                 ime: podaci.get('ime'),
                 prezime: podaci.get('prezime'),
                 brojtelefona: podaci.get('brojtelefona'),
@@ -69,7 +70,7 @@ export default function OsobePromjeni(){
             <InputText atribut='prezime' vrijednost='' />
             <InputText atribut='brojTelefona' vrijednost='' />
             <InputText atribut='email' vrijednost='' />
-            <Akcije odustani={RoutesNames.OSOBE_PREGLED} akcija='Dodaj osobu' />       
+            <Akcije odustani={RoutesNames.OSOBE_PREGLED} akcija='Promjeni osobu' />       
           </Form>
         </Container>
       );

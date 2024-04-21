@@ -1,11 +1,12 @@
-import { Button, Col, Container, Form, Row } from 'react-bootstrap';
-import { Link, useNavigate } from 'react-router-dom';
+import { Container, Form } from 'react-bootstrap';
+import { useNavigate } from 'react-router-dom';
 import { RoutesNames } from '../../constants';
-import ProizvodService from '../../services/ProizvodService';
+import Service from '../../services/ProizvodService';
 import useError from '../../hooks/useError';
 import InputText from '../../Components/InputText';
 import Akcije from '../../Components/Akcije';
 
+import useLoading from '../../hooks/useLoading';
 
 
 
@@ -13,15 +14,19 @@ import Akcije from '../../Components/Akcije';
 export default function ProizvodiDodaj() {
   const navigate = useNavigate();
   const { prikaziError } = useError();
+  const { showLoading, hideLoading } = useLoading();
+  
 
-  async function dodajProizvod(proizvod) {
-    const odgovor = await ProizvodService.dodaj(proizvod);
+  async function dodajProizvod(Proizvod) {
+    showLoading();
+    const odgovor = await Service.dodaj('Proizvod',Proizvod);
     if (odgovor.ok) {
+      hideLoading();
       navigate(RoutesNames.PROIZVODI_PREGLED);
-    } else {
-      console.log(odgovor);
-      prikaziError(odgovor.podaci);
+      return
     }
+    prikaziError(odgovor.podaci);
+    hideLoading();
   }
 
   function handleSubmit(e) {
@@ -30,10 +35,13 @@ export default function ProizvodiDodaj() {
     dodajProizvod({
       naziv: podaci.get('naziv'),
       sifraProizvoda: podaci.get('sifraProizvoda'),
-      mjernaJedinica: podaci.get('mjernaJedinica')
-      
+      mjernaJedinica: podaci.get('mjernaJedinica'),
+     
+      slika: slika ? slika : '' // Ako ne postoji slika, ostavljamo prazno polje
     });
   }
+
+  
 
   return (
     <Container className='mt-4'>
@@ -41,6 +49,11 @@ export default function ProizvodiDodaj() {
         <InputText atribut='naziv' vrijednost='' />
         <InputText atribut='sifraProizvoda' vrijednost='' />
         <InputText atribut='mjernaJedinica' vrijednost='' />
+         {/* Input polje za odabir slike */}
+         <Form.Group controlId="slika">
+          <Form.Label>Odaberi sliku</Form.Label>
+          <Form.Control type="file" name="slika" accept="image/*" />
+        </Form.Group>
         <Akcije odustani={RoutesNames.PROIZVODI_PREGLED} akcija='Dodaj prizvod' />  
       </Form>
     </Container>

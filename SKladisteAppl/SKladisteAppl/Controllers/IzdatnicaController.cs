@@ -1,428 +1,465 @@
 ﻿using SKladisteAppl.Data;
 using SKladisteAppl.Models;
 using Microsoft.AspNetCore.Mvc;
-
+using SKladisteAppl.Mappers;
 using Microsoft.EntityFrameworkCore;
-using SKladisteAppl.Extensions;
-using IzdatnicaDTOInsertUpdate = SKladisteAppl.Models.IzdatnicaDTOInsertUpdate;
+using System.Text;
 
 
 
-namespace SKladisteAppl.Controllers
+
+
+
+namespace SKladisteAppl.Controllers;
+
+
+[ApiController]
+[Route("api/v1/[controller]")]
+public class IzdatnicaController : SkladisteController<Izdatnica, IzdatnicaDTORead, IzdatnicaDTOInsertUpdate>
 {
-    /// <summary>
-    /// Namjenjeno za CRUD operacije nad entitetom izdatnice u bazi
-    /// </summary>
-    [ApiController]
-    [Route("api/v1/[controller]")]
-    public class IzdatnicaController : ControllerBase
+   
+
+    public IzdatnicaController(SkladisteContext context) : base(context)
     {
-        /// <summary>
-        /// Kontest za rad s bazom koji će biti postavljen s pomoću Dependecy Injection-om
-        /// </summary>
-        private readonly SkladisteContext _context;
-        /// <summary>
-        /// Konstruktor klase koja prima Skladiste kontext
-        /// pomoću DI principa
-        /// </summary>
-        /// <param name="context"></param>
-        public IzdatnicaController(SkladisteContext context)
+        DbSet = _context.Izdatnice;
+        _mapper = new MappingIzdatnica();
+    }
+
+
+
+
+    [HttpGet]
+    [Route("Proizvodi/{sifraIzdatnice:int}")]
+    public IActionResult GetProizvodi(int sifraIzdatnice)
+    {
+        // kontrola ukoliko upit nije valjan
+        if (!ModelState.IsValid || sifraIzdatnice <= 0)
         {
-            _context = context;
+            return BadRequest(ModelState);
         }
-        /// <summary>
-        /// Prikazuje sve izdatnice iz baze
-        /// </summary>
-        /// <remarks>
-        /// Primjer upita
-        /// 
-        ///    GET api/v1/Izdatnica
-        ///    
-        /// </remarks>
-        /// <returns>Izdatnice u bazi</returns>
-        /// <response code="200">Sve OK, ako nema podataka content-length: 0 </response>
-        /// <response code="400">Zahtjev nije valjan</response>
-        /// <response code="503">Baza na koju se spajam nije dostupna</response>
-        [HttpGet]
-        public IActionResult Get()
+        try
         {
-            // kontrola ukoliko upit nije valjan
-            if (!ModelState.IsValid)
+            var proizvodi = _context.IzdatniceProizvodi 
+                .Include(i => i.Proizvod)
+                .Include(i => i.Izdatnica)
+                .Where(x => x.Izdatnica.Sifra == sifraIzdatnice).ToList();
+            if (proizvodi == null)
             {
-                return BadRequest(ModelState);
+                return BadRequest("Ne postoji proizvod s šifrom " + sifraIzdatnice + " u bazi");
             }
-            try
-            {
-                var lista = _context.Izdatnice
-                  .Include(i => i.Osoba)
-                  .Include(i => i.Skladistar)
-                  .Include(i => i.Proizvodi)
-                  .ToList();
-                if (lista == null || lista.Count == 0)
-                   
-                {
-                    return new EmptyResult();
-                }
-                return new JsonResult(lista.MapIzdatnicaReadList());
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(StatusCodes.Status503ServiceUnavailable,
-                    ex.Message);
-            }
+            List<IzdatniceProizvodiDTORead> lista = new List<IzdatniceProizvodiDTORead>();
+            proizvodi.ForEach(x => lista.Add(new IzdatniceProizvodiDTORead(x.Sifra, x.Proizvod.Naziv, x.Kolicina)));
+
+            return new JsonResult(lista);
         }
-        /// <summary>
-        /// Dohvaća sve sifru iz baze
-        /// </summary>
-        /// <remarks>
-        /// Primjer upita
-        /// 
-        ///    GET api/v1/Sifra
-        ///    
-        /// </remarks>
-        /// <returns>Sifre u bazi</returns>
-        /// <response code="200">Sve OK, ako nema podataka content-length: 0 </response>
-        /// <response code="400">Zahtjev nije valjan</response>
-        /// <response code="503">Baza na koju se spajam nije dostupna</response>
-
-        [HttpGet]
-        [Route("{sifra:int}")]
-        public IActionResult GetBySifra(int sifra)
+        catch (Exception ex)
         {
-            // kontrola ukoliko upit nije valjan
-            if (!ModelState.IsValid || sifra <= 0)
-            {
-                return BadRequest(ModelState);
-            }
-            try
-            {
-                var p = _context.Izdatnice.Include(i => i.Osoba).Include(i => i.Skladistar)
-                    .Include(i => i.Proizvodi).FirstOrDefault(x => x.Sifra == sifra);
-                if (p == null)
-                {
-                    return new EmptyResult();
-                }
-                return new JsonResult(p);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(StatusCodes.Status503ServiceUnavailable,
-                    ex.Message);
-            }
-        }
-        /// <summary>
-        /// Dodaje novu izdatnicu u bazu
-        /// </summary>
-        /// <remarks>
-        ///     POST api/v1/Izdatnica
-        ///     {naziv: "Primjer naziva"}
-        /// </remarks>
-        /// <param name="dto">Izdatnica za unijeti u JSON formatu</param>
-        /// <response code="201">Kreirano</response>
-        /// <response code="400">Zahtjev nije valjan (BadRequest)</response> 
-        /// <response code="503">Baza nedostupna iz razno raznih razloga</response> 
-        /// <returns>Izdatnica s šifrom koju je dala baza</returns>
-        [HttpPost]
-        public IActionResult Post(IzdatnicaDTOInsertUpdate dto)
-        {
-            if (!ModelState.IsValid || dto == null)
-            {
-                return BadRequest();
-            }
-
-            var osoba = _context.Osobe.Find(dto.osobasifra);
-
-            if (osoba == null)
-            {
-                return BadRequest();
-            }
-
-            var skladistar = _context.Skladistari.Find(dto.skladistarSifra);
-
-            if (skladistar == null)
-            {
-                return BadRequest();
-            }
-
-
-            var entitet = dto.MapIzdatnicaInsertUpdateFromDTO(new Izdatnica());
-
-            entitet.Osoba = osoba;
-            entitet.Skladistar = skladistar;
-            entitet.Proizvodi = new List<Proizvod>();
-
-            try
-            {
-                _context.Izdatnice.Add(entitet);
-                _context.SaveChanges();
-                return StatusCode(StatusCodes.Status201Created, entitet.MapIzdatnicaReadToDTO());
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(StatusCodes.Status503ServiceUnavailable,
-                    ex.Message);
-            }
-
-        }
-        ///// <summary>
-        ///// Mijenja podatke postojeće izdartnice u bazi
-        ///// </summary>
-        ///// <remarks>
-        ///// Primjer upita:
-        /////
-        /////    PUT api/v1/izdatnica/1
-        /////
-        ///// {
-        /////  "sifra": 0,
-        /////  "Broj izdatnice": "Novi Broj izdatnice",
-        /////  "Datum": "Novi Datum"
-        /////  "napomena": "nova napomena
-        ///// }
-        /////
-        ///// </remarks>
-        ///// <param name="sifra">Šifra izdatnice koja se mijenja</param>  
-        ///// <param name="izdatnica">Izdatnica za unijeti u JSON formatu</param>  
-        ///// <returns>Svi poslani podaci od izdatnice koji su spremljeni u bazi</returns>
-        ///// <response code="200">Sve je u redu</response>
-        ///// <response code="204">Nema u bazi izdatnice koju želimo promijeniti</response>
-        ///// <response code="415">Nismo poslali JSON</response> 
-        ///// <response code="503">Baza nedostupna</response> 
-
-
-        [HttpPut]
-        [Route("{sifra:int}")]
-        public IActionResult Put(int sifra, Models.IzdatnicaDTOInsertUpdate dto)
-        {
-            if (sifra <= 0 || !ModelState.IsValid || dto == null)
-            {
-                return BadRequest();
-            }
-
-
-            try
-            {
-
-                var entitet = _context.Izdatnice.Include(i => i.Osoba).Include(i => i.Skladistar)
-                    .Include(i => i.Proizvodi).FirstOrDefault(x => x.Sifra == sifra);
-
-                if (entitet == null)
-                {
-                    return StatusCode(StatusCodes.Status204NoContent, sifra);
-                }
-
-                var osoba = _context.Osobe.Find(dto.osobasifra);
-
-                if (osoba == null)
-                {
-                    return BadRequest();
-                }
-
-                var skladistar = _context.Skladistari.Find(dto.skladistarSifra);
-
-                if (skladistar == null)
-                {
-                    return BadRequest();
-                }
-
-
-                entitet = dto.MapIzdatnicaInsertUpdateFromDTO(entitet);
-
-                entitet.Osoba = osoba;
-                entitet.Skladistar = skladistar;
-
-
-                _context.Izdatnice.Update(entitet);
-                _context.SaveChanges();
-
-                return StatusCode(StatusCodes.Status200OK, entitet.MapIzdatnicaReadToDTO());
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(StatusCodes.Status503ServiceUnavailable,
-                    ex.Message);
-            }
-
-        }
-        /// <summary>
-        /// Briše izdatnicu iz baze
-        /// </summary>
-        /// <remarks>
-        /// Primjer upita:
-        ///
-        ///    DELETE api/v1/izdatnica/1
-        ///    
-        /// </remarks>
-        /// <param name="sifra">Šifra izdatnice koja se briše</param>  
-        /// <returns>Odgovor da li je obrisano ili ne</returns>
-        /// <response code="200">Sve je u redu, obrisano je u bazi</response>
-        /// <response code="204">Nema u bazi izdatnice kojeu želimo obrisati</response>
-        /// <response code="503">Problem s bazom</response> 
-        [HttpDelete]
-        [Route("{sifra:int}")]
-        [Produces("application/json")]
-        public IActionResult Delete(int sifra)
-        {
-            if (!ModelState.IsValid || sifra <= 0)
-            {
-                return BadRequest();
-            }
-
-            try
-            {
-                var entitetIzBaze = _context.Izdatnice.Find(sifra);
-
-                if (entitetIzBaze == null)
-                {
-                    return StatusCode(StatusCodes.Status204NoContent, sifra);
-                }
-
-                _context.Izdatnice.Remove(entitetIzBaze);
-                _context.SaveChanges();
-
-                return new JsonResult("{\"poruka\": \"Obrisano\"}"); // ovo nije baš najbolja praksa ali da znake kako i to može
-
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(StatusCodes.Status503ServiceUnavailable,
-                    ex.Message);
-            }
-
-        }
-
-        [HttpGet]
-        [Route("Proizvodi/{sifraGrupe:int}")]
-        public IActionResult GetProizvodi(int sifraIzdatnice)
-        {
-            // kontrola ukoliko upit nije valjan
-            if (!ModelState.IsValid || sifraIzdatnice <= 0)
-            {
-                return BadRequest(ModelState);
-            }
-            try
-            {
-                var p = _context.Izdatnice
-                    .Include(i => i.Proizvodi).FirstOrDefault(x => x.Sifra == sifraIzdatnice);
-                if (p == null)
-                {
-                    return new EmptyResult();
-                }
-                return new JsonResult(p.Proizvodi!.MapProizvodReadList());
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(StatusCodes.Status503ServiceUnavailable,
-                    ex.Message);
-            }
-        }
-
-       
-
-        [HttpPost]
-        [Route("{sifra:int}/dodaj/{proizvodSifra:int}")]
-        public IActionResult DodajProizvod(int sifra, int proizvodSifra)
-        {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest();
-            }
-
-            if (sifra <= 0 || proizvodSifra <= 0)
-            {
-                return BadRequest();
-            }
-
-            try
-            {
-
-                var izdatnica = _context.Izdatnice
-                    .Include(g => g.Proizvodi)
-                    .FirstOrDefault(g => g.Sifra == sifra);
-
-                if (izdatnica == null)
-                {
-                    return BadRequest();
-                }
-
-                var proizvod = _context.Proizvodi.Find(proizvodSifra);
-
-                if (proizvod == null)
-                {
-                    return BadRequest();
-                }
-
-                izdatnica.Proizvodi.Add(proizvod);
-
-                _context.Izdatnice.Update(izdatnica);
-                _context.SaveChanges();
-
-                return Ok();
-
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(
-                       StatusCodes.Status503ServiceUnavailable,
-                       ex.Message);
-
-            }
-
-        }
-
-
-
-        [HttpDelete]
-        [Route("{sifra:int}/obrisi/{proizvodSifra:int}")]
-        public IActionResult ObrisiIzdatnicu(int sifra, int proizvodSifra)
-        {
-
-            if (!ModelState.IsValid)
-            {
-                return BadRequest();
-            }
-
-            if (sifra <= 0 || proizvodSifra <= 0)
-            {
-                return BadRequest();
-            }
-
-            try
-            {
-
-                var izdatnica = _context.Izdatnice
-                    .Include(g => g.Proizvodi)
-                    .FirstOrDefault(g => g.Sifra == sifra);
-
-                if (izdatnica == null)
-                {
-                    return BadRequest();
-                }
-
-                var proizvod = _context.Proizvodi.Find(proizvodSifra);
-
-                if (proizvod == null)
-                {
-                    return BadRequest();
-                }
-
-
-                izdatnica.Proizvodi.Remove(proizvod);
-
-                _context.Izdatnice.Update(izdatnica);
-                _context.SaveChanges();
-
-                return Ok();
-
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(
-                       StatusCodes.Status503ServiceUnavailable,
-                       ex.Message);
-
-            }
-
-
+            return StatusCode(StatusCodes.Status503ServiceUnavailable,
+                     ex.Message);
         }
     }
+
+
+
+
+
+    [HttpPost]
+    [Route("{sifra:int}/dodaj/{proizvodSifra:int}")]
+    public IActionResult DodajProizvod(int sifra, int proizvodSifra)
+    {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+
+        if (sifra <= 0 || proizvodSifra <= 0)
+        {
+            return BadRequest("Šifra izdatnice ili proizvoda nije dobra");
+        }
+
+        try
+        {
+            var izdatnica = _context.Izdatnice
+                .Include(i => i.IzdatniceProizvodi) // Uključujemo izdatnice proizvode kako bismo mogli raditi s njima
+                .FirstOrDefault(g => g.Sifra == sifra);
+
+            if (izdatnica == null)
+            {
+                return BadRequest("Ne postoji izdatnica s šifrom " + sifra + " u bazi");
+            }
+
+            var proizvod = _context.Proizvodi.FirstOrDefault(p => p.Sifra == sifra);
+
+            if (proizvod == null)
+            {
+                return BadRequest("Ne postoji proizvod s šifrom " + sifra + " u bazi");
+            }
+
+            // Provjeravamo postoji li već proizvod s istim šifrom na izdatnici
+            var postojeciProizvod = izdatnica.IzdatniceProizvodi.FirstOrDefault(ip => ip.Sifra ==sifra);
+            if (postojeciProizvod != null)
+            {
+                // Ako postoji, ažuriramo količinu
+                postojeciProizvod.Kolicina += Kolicina;
+            }
+            else
+            {
+                // Ako ne postoji, dodajemo novi proizvod na izdatnicu
+                izdatnica.IzdatniceProizvodi.Add(new IzdatnicaProizvod { Proizvod = proizvod, Kolicina = kolicina });
+            }
+
+            _context.SaveChanges();
+
+            return Ok("Proizvod uspješno dodan na izdatnicu");
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(StatusCodes.Status503ServiceUnavailable, ex.Message);
+        }
+    }
+
+
+
+    [HttpDelete]
+    [Route("ObrisiProizvod/{sifraIzdatnice:int}/{proizvodSifra:int}")]
+    public IActionResult ObrisiProizvod(int sifraIzdatnice, int proizvodSifra)
+    {
+
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+
+        if (sifraIzdatnice <= 0  || proizvodSifra <= 0)
+        {
+            return BadRequest("Šifra izdatnice ili proizvoda nije dobra");
+        }
+
+        try
+        {
+
+
+            var izdatnica = _context.Izdatnice
+                .Include(g => g.Proizvodi)
+                    .FirstOrDefault(g => g.Sifra == sifraIzdatnice);
+
+            if (izdatnica == null)
+            {
+                return BadRequest("Ne postoji izdatnica  s šifrom " + sifraIzdatnice + " u bazi");
+            }
+
+            var proizvod = _context.Proizvodi.Find(proizvodSifra);
+
+            if (proizvod == null)
+            {
+                return BadRequest("Ne postoji proizvod s šifrom " + proizvodSifra + " u bazi");
+            }
+            izdatnica.Proizvodi.Remove(proizvod);
+
+            _context.Izdatnice.Update(izdatnica);
+            _context.SaveChanges();
+
+            return Ok();
+
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ex.Message);
+
+        }
+
+    }
+
+
+    [HttpPatch]
+    [Route("PromjeniProizvod/{sifra:int}")]
+    public IActionResult PromjeniProizvod(int sifra, int Kolicina)
+    {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+        try
+        {
+
+            var entitet = _context.IzdatniceProizvodi.Include(x => x.Proizvod).FirstOrDefault(x => x.Sifra == sifra);
+
+            if (entitet == null)
+            {
+                return BadRequest("Ne postoji proizvod na na izdatnici s šifrom " + sifra + " u bazi");
+            }
+
+            entitet.Kolicina = Kolicina;
+
+            _context.IzdatniceProizvodi.Update(entitet);
+            _context.SaveChanges();
+
+            return new JsonResult(new IzdatniceProizvodiDTORead(entitet.Sifra, entitet.Proizvod.Naziv, entitet.Kolicina));
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ex.Message);
+        }
+
+    }
+
+
+    protected override void KontrolaBrisanje(Izdatnica entitet)
+    {
+        var lista = _context.Izdatnice;
+        if (lista != null && lista.Count() > 0)
+        { 
+            StringBuilder sb = new StringBuilder();
+            sb.Append("Izdatnica se ne može obrisati jer su na njoj proizvodi: ");
+            foreach (var e in lista)
+            {
+                sb.Append(e.BrojIzdatnice).Append(", ");
+            }
+
+            throw new Exception(sb.ToString().Substring(0, sb.ToString().Length - 2));
+        }
+    }
+
+    protected override Izdatnica KreirajEntitet(IzdatnicaDTOInsertUpdate dto)
+    {
+        var osoba = _context.Osobe.Find(dto.osobaSifra) ?? throw new Exception("Ne postoji osoba s šifrom " + dto.osobaSifra + " u bazi");
+        var skladistar = _context.Skladistari.Find(dto.skladistarSifra) ?? throw new Exception("Ne postoji skladistar s šifrom " + dto.skladistarSifra + " u bazi");
+        var entitet = _mapper.MapInsertUpdatedFromDTO(dto);
+        entitet.IzdatniceProizvodi = new List<IzdatnicaProizvod>();
+        entitet.Osoba = osoba;
+        entitet.Skladistar = skladistar;
+        return entitet;
+    }
+
+    protected override List<IzdatnicaDTORead> UcitajSve()
+    {
+        var lista = _context.Izdatnice  
+                .Include(g => g.Osoba)
+                .Include(g => g.Skladistar)
+                .Include(g => g.IzdatniceProizvodi)
+                .ThenInclude(g=>g.Proizvod)
+                .ToList();
+        if (lista == null || lista.Count == 0)
+        {
+            throw new Exception("Ne postoje podaci u bazi");
+        }
+
+        var dtoLista = new List<IzdatnicaDTORead>();
+        foreach ( var item in lista)
+        {
+            var LPNI = new List<ProizvodNaIzdatniciDTORead>();
+            foreach(var p in item.IzdatniceProizvodi)
+            {
+                LPNI.Add(new ProizvodNaIzdatniciDTORead(p.Proizvod.Naziv, p.Kolicina));
+                dtoLista.Add(new IzdatnicaDTORead(
+                item.Sifra,
+                    item.BrojIzdatnice,
+                item.Datum,
+                item.Osoba == null ? "" : (item.Osoba.Ime
+                        + " " + item.Osoba.Prezime).Trim(),
+                item.Skladistar == null ? "" : (item.Skladistar.Ime
+                        + " " + item.Skladistar.Prezime).Trim(),
+               
+                LPNI,
+
+                    item.Napomena
+                    ));
+            }
+        }
+
+        return dtoLista;
+    }
+
+    protected override Izdatnica NadiEntitet(int sifra)
+    {
+        return _context.Izdatnice.Include(i => i.Osoba).Include(i => i.Skladistar)
+                .Include(i => i.IzdatniceProizvodi).FirstOrDefault(x => x.Sifra == sifra) ?? throw new Exception("Ne postoji izdatnica s šifrom " + sifra + " u bazi");
+    }
+
+
+
+    protected override Izdatnica PromjeniEntitet(IzdatnicaDTOInsertUpdate dto, Izdatnica entitet)
+    {
+        var osoba = _context.Osobe.Find(dto.osobaSifra) ?? throw new Exception("Ne postoji osoba s šifrom " + dto.osobaSifra + " u bazi");
+        var skladistar = _context.Skladistari.Find(dto.skladistarSifra) ?? throw new Exception("Ne postoji skladištar s šifrom " + dto.skladistarSifra + " u bazi");
+
+
+        /*
+        List<Proizvod> proizvodi = entitet.Proizvodi;
+        entitet = _mapper.MapInsertUpdatedFromDTO(dto);
+        entitet.Proizvodi = proizvodi;
+        */
+
+        // ovdje je možda pametnije ići s ručnim mapiranje
+        entitet.BrojIzdatnice = dto.brojizdatnice;
+        entitet.Datum = dto.datum;
+        entitet.Napomena = dto.napomena;
+        entitet.Osoba = osoba;
+        entitet.Skladistar = skladistar;
+
+        return entitet;
+    }
+
+//    [HttpGet]
+//    [Route("Proizvodi/{sifraIzdatnica:int}")]
+//    public IActionResult GetProizvodi(int sifraIzdatnica)
+//    {
+//        // kontrola ukoliko upit nije valjan
+//        if (!ModelState.IsValid || sifraIzdatnica <= 0)
+//        {
+//            return BadRequest(ModelState);
+//        }
+//        try
+//        {
+//            var p = _context.Izdatnice
+//                     .Include(i => i.Proizvodi).FirstOrDefault(x => x.Sifra == sifraIzdatnica);
+//            if (p == null)
+//            {
+//                return BadRequest("Ne postoje Izdatnica s šifrom " + sifraIzdatnica + " u bazi");
+//            }
+
+//            //    // nisam radio posebno mapper
+//            //    List<IzdatniceProizvodiDTORead> lista = new List<IzdatniceProizvodiDTORead>();
+//            //    kolicine.ForEach(x => lista.Add(new IzdatniceProizvodiDTORead(x.Sifra, x.Proizvod.Naziv, x.Kolicina)));
+
+//            //    return new JsonResult(lista);
+//            //}
+//            //catch (Exception ex)
+//            //{
+//            //    return StatusCode(StatusCodes.Status503ServiceUnavailable,
+//            //        ex.Message);
+//        }
+//    }
+
+
+//    [HttpPost]
+//    [Route("DodajKolicinu")]
+//    public IActionResult DodajKolicinu(IzdatniceProizvodiDTOInsertUpdate dto)
+//    {
+//        if (!ModelState.IsValid)
+//        {
+//            return BadRequest(ModelState);
+//        }
+//        try
+//        {
+//            var izdatnica = _context.Izdatnice.Find(dto.izdatnicaSifra);
+
+//            if (izdatnica == null)
+//            {
+//                throw new Exception("Ne postoji izdatnica s šifrom " + dto.izdatnicaSifra + " u bazi");
+//            }
+
+//            var proizvod = _context.Proizvodi.Find(dto.proizvodSifra);
+
+//            if (proizvod == null)
+//            {
+//                throw new Exception("Ne postoji proizvod s šifrom " + dto.proizvodSifra + " u bazi");
+//            }
+
+//            var entitet = new IzdatniceProizvodi() { Izdatnica = izdatnica, Proizvod = proizvod, kolicina = dto.kolicina };
+
+//            _context.IzdatniceProizvodi.Add(entitet);
+//            _context.SaveChanges();
+
+//            return new JsonResult(new IzdatniceProizvodiDTORead(entitet.Sifra, entitet.Proizvod.Naziv, entitet.kolicina));
+//        }
+//        catch (Exception ex)
+//        {
+//            return BadRequest(ex.Message);
+//        }
+
+//    }
+
+
+
+//    [HttpDelete]
+//    [Route("ObrisiProizvod/{sifra:int}")]
+//    public IActionResult ObrisiProizvod(int sifra)
+//    {
+
+//        if (!ModelState.IsValid)
+//        {
+//            return BadRequest(ModelState);
+//        }
+
+//        if (sifra <= 0)
+//        {
+//            return BadRequest("Šifra proizvoda nije dobra");
+//        }
+
+//        try
+//        {
+
+//            var entitet = _context.IzdatniceProizvodi.Find(sifra);
+
+//            if (entitet == null)
+//            {
+//                return BadRequest("Ne postoji proizvod na izdatnici s šifrom " + sifra + " u bazi");
+//            }
+
+//            _context.IzdatniceProizvodi.Remove(entitet);
+//            _context.SaveChanges();
+
+//            return Ok("Obrisano");
+
+//        }
+//        catch (Exception ex)
+//        {
+//            return BadRequest(ex.Message);
+
+//        }
+
+//    }
+
+//    [HttpPatch]
+//    [Route("PromjeniProizvod/{sifra:int}")]
+//    public IActionResult PromjeniProizvod(int sifra, int kolicina)
+//    {
+//        if (!ModelState.IsValid)
+//        {
+//            return BadRequest(ModelState);
+//        }
+//        try
+//        {
+
+//            var entitet = _context.IzdatniceProizvodi.Include(x => x.Proizvod).FirstOrDefault(x => x.Sifra == sifra);
+
+//            if (entitet == null)
+//            {
+//                return BadRequest("Ne postoji proizvod na izdatnici s šifrom " + sifra + " u bazi");
+//            }
+
+//            entitet.kolicina = kolicina;
+
+//            _context.IzdatniceProizvodi.Update(entitet);
+//            _context.SaveChanges();
+
+//            return new JsonResult(new IzdatniceProizvodDTORead(entitet.Sifra, entitet.Proizvod.Naziv, entitet.kolicina));
+//        }
+//        catch (Exception ex)
+//        {
+//            return BadRequest(ex.Message);
+//        }
+
+//    }
+///// <inheritdoc/>
+
+
+//    //protected override void KontrolaBrisanje(Izdatnica entitet)
+//    //{
+//    //    var lista = _context.Izdatnica.Include(x => x.Proizvod).Where(x => x.Proizvod.Sifra == entitet.Sifra).ToList();
+
+//    //    if (lista != null && lista.Count() > 0)
+//    //    {
+//    //        StringBuilder sb = new StringBuilder();
+//    //        sb.Append("Izdatnica se ne može obrisati jer je postavljen sa proizvodima: ");
+//    //        foreach (var e in lista)
+//    //        {
+//    //            sb.Append(e.Naziv).Append(", ");
+//    //        }
+
+//    //        throw new Exception(sb.ToString().Substring(0, sb.ToString().Length - 2));
+//    //    }
+//    //}
 }
+

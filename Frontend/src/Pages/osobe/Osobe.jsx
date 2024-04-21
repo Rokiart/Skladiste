@@ -6,7 +6,6 @@ import { FaRegEdit } from "react-icons/fa";
 import { FaRegTrashAlt } from "react-icons/fa";
 import { Link, useNavigate } from "react-router-dom";
 import { RoutesNames } from "../../constants";
-
 import useError from "../../hooks/useError";
 
 
@@ -19,7 +18,7 @@ export default function Osobe() {
     
 
     async function dohvatiOsobe(){
-        const odgovor = await OsobaService.get();
+        const odgovor = await OsobaService.get('Osoba');
         if(!odgovor.ok){
             prikaziError(odgovor.podaci);
             return;
@@ -28,7 +27,7 @@ export default function Osobe() {
     }
 
     async function ObrisiOsobu(sifra){
-        const odgovor = await OsobaService.obrisi(sifra);
+        const odgovor = await OsobaService.obrisi('Osoba',sifra);
         prikaziError(odgovor.podaci);
         if (odgovor.ok){
             
