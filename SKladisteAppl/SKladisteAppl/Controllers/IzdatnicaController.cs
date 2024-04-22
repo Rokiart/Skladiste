@@ -48,7 +48,7 @@ public class IzdatnicaController : SkladisteController<Izdatnica, IzdatnicaDTORe
                 return BadRequest("Ne postoji proizvod s šifrom " + sifraIzdatnice + " u bazi");
             }
             List<IzdatniceProizvodiDTORead> lista = new List<IzdatniceProizvodiDTORead>();
-            proizvodi.ForEach(x => lista.Add(new IzdatniceProizvodiDTORead(x.Sifra, x.Proizvod.Naziv, x.Kolicina)));
+            proizvodi.ForEach(x => lista.Add(new IzdatniceProizvodiDTORead(x.Proizvod.Sifra, x.Proizvod.Naziv, x.Kolicina)));
 
             return new JsonResult(lista);
         }
@@ -74,13 +74,13 @@ public class IzdatnicaController : SkladisteController<Izdatnica, IzdatnicaDTORe
 
         if (sifra <= 0 || proizvodSifra <= 0)
         {
-            return BadRequest("Šifra izdatnice ili proizvoda nije dobra");
+            return BadRequest("Šifra izdatnice iliproizvoda nije dobra");
         }
 
         try
         {
+
             var izdatnica = _context.Izdatnice
-                .Include(i => i.IzdatniceProizvodi) // Uključujemo izdatnice proizvode kako bismo mogli raditi s njima
                 .FirstOrDefault(g => g.Sifra == sifra);
 
             if (izdatnica == null)
@@ -88,34 +88,30 @@ public class IzdatnicaController : SkladisteController<Izdatnica, IzdatnicaDTORe
                 return BadRequest("Ne postoji izdatnica s šifrom " + sifra + " u bazi");
             }
 
-            var proizvod = _context.Proizvodi.FirstOrDefault(p => p.Sifra == sifra);
+            var proizvod = _context.Proizvodi.Find(proizvodSifra);
 
             if (proizvod == null)
             {
-                return BadRequest("Ne postoji proizvod s šifrom " + sifra + " u bazi");
+                return BadRequest("Ne postoji proizvod s šifrom " + proizvodSifra + " u bazi");
             }
+            // Ovu količinu jedan kasnije omogući unos preko modala, za sada dodaje jedan proizvod
+            var ip = new IzdatnicaProizvod() { Izdatnica = izdatnica, Proizvod = proizvod, Kolicina = 1 };
 
-            // Provjeravamo postoji li već proizvod s istim šifrom na izdatnici
-            var postojeciProizvod = izdatnica.IzdatniceProizvodi.FirstOrDefault(ip => ip.Sifra ==sifra);
-            if (postojeciProizvod != null)
-            {
-                // Ako postoji, ažuriramo količinu
-                postojeciProizvod.Kolicina += Kolicina;
-            }
-            else
-            {
-                // Ako ne postoji, dodajemo novi proizvod na izdatnicu
-                izdatnica.IzdatniceProizvodi.Add(new IzdatnicaProizvod { Proizvod = proizvod, Kolicina = kolicina });
-            }
 
+            _context.IzdatniceProizvodi.Add(ip);
             _context.SaveChanges();
 
-            return Ok("Proizvod uspješno dodan na izdatnicu");
+            return Ok();
+
         }
         catch (Exception ex)
         {
-            return StatusCode(StatusCodes.Status503ServiceUnavailable, ex.Message);
+            return StatusCode(
+                   StatusCodes.Status503ServiceUnavailable,
+                   ex.Message);
+
         }
+
     }
 
 
@@ -139,24 +135,17 @@ public class IzdatnicaController : SkladisteController<Izdatnica, IzdatnicaDTORe
         {
 
 
-            var izdatnica = _context.Izdatnice
-                .Include(g => g.Proizvodi)
-                    .FirstOrDefault(g => g.Sifra == sifraIzdatnice);
+            var izdatnica = _context.IzdatniceProizvodi
+                    .Include(g => g.Proizvod)
+                    .Include(g => g.Izdatnica)
+                    .FirstOrDefault(g => g.Izdatnica.Sifra == sifraIzdatnice && g.Proizvod.Sifra==proizvodSifra);
 
             if (izdatnica == null)
             {
-                return BadRequest("Ne postoji izdatnica  s šifrom " + sifraIzdatnice + " u bazi");
+                return BadRequest("Ne postoji proizvod s šifrom " + proizvodSifra + " izdatnica  s šifrom " + sifraIzdatnice + " u bazi");
             }
 
-            var proizvod = _context.Proizvodi.Find(proizvodSifra);
-
-            if (proizvod == null)
-            {
-                return BadRequest("Ne postoji proizvod s šifrom " + proizvodSifra + " u bazi");
-            }
-            izdatnica.Proizvodi.Remove(proizvod);
-
-            _context.Izdatnice.Update(izdatnica);
+            _context.IzdatniceProizvodi.Remove(izdatnica);
             _context.SaveChanges();
 
             return Ok();
